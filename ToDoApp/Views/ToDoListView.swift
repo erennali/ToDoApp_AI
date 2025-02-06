@@ -14,7 +14,9 @@ struct ToDoListView: View {
  
     
     init (userId:String) {
-        self._items = FirestoreQuery(collectionPath: "users/\(userId)/todos")
+        self._items = FirestoreQuery(collectionPath: "users/\(userId)/todos",predicates: [
+            .order(by: "dueDate", descending: false)
+        ])
         self._viewModel = StateObject(wrappedValue: ToDoListViewViewModel(userId: userId))
     }
     

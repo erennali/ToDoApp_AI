@@ -15,11 +15,13 @@ struct NewItemView: View {
             Text("Yeni Görev")
                 .font(.title)
                 .bold()
-                .padding(.top,100)
+                .padding(.top,70)
             Form {
                 TextField("Başlık", text:$viewModel.title)
+                TextField("Açıklama", text:$viewModel.description,axis: .vertical)
+                    
                 DatePicker("Bitiş Tarihi",selection: $viewModel.dueDate)
-                    .datePickerStyle(GraphicalDatePickerStyle())
+                    .datePickerStyle(.graphical)
                 BigButton(title: "Kaydet"){
                     if viewModel.canSave {
                         viewModel.save()

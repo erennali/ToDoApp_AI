@@ -27,9 +27,7 @@ class ToDoListItemViewViewModel : ObservableObject {
             .document(uid)
             .collection("todos")
             .document(item.id)
-            .setData(itemCopy.asDictionary())
-            
-        
+            .updateData(["isDone": !item.isDone])
     }
     
 }

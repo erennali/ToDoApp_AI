@@ -6,12 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BAAAC2482D537608001E2F51 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC2472D537608001E2F51 /* FirebaseAuth */; };
+		BAAAC24A2D537608001E2F51 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC2492D537608001E2F51 /* FirebaseCore */; };
+		BAAAC24C2D537608001E2F51 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC24B2D537608001E2F51 /* FirebaseFirestore */; };
+		BAAAC24E2D537608001E2F51 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC24D2D537608001E2F51 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BAAAC2352D5375B1001E2F51 /* ToDoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		BAAAC2372D5375B1001E2F51 /* ToDoApp */ = {
+		BAAAC27F2D53786F001E2F51 /* ToDoApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ToDoApp;
 			sourceTree = "<group>";
@@ -23,6 +30,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BAAAC24A2D537608001E2F51 /* FirebaseCore in Frameworks */,
+				BAAAC24E2D537608001E2F51 /* FirebaseStorage in Frameworks */,
+				BAAAC2482D537608001E2F51 /* FirebaseAuth in Frameworks */,
+				BAAAC24C2D537608001E2F51 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,8 +43,8 @@
 		BAAAC22C2D5375B1001E2F51 = {
 			isa = PBXGroup;
 			children = (
-				BAAAC2372D5375B1001E2F51 /* ToDoApp */,
 				BAAAC2362D5375B1001E2F51 /* Products */,
+				BAAAC27F2D53786F001E2F51 /* ToDoApp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -61,10 +72,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BAAAC2372D5375B1001E2F51 /* ToDoApp */,
+				BAAAC27F2D53786F001E2F51 /* ToDoApp */,
 			);
 			name = ToDoApp;
 			packageProductDependencies = (
+				BAAAC2472D537608001E2F51 /* FirebaseAuth */,
+				BAAAC2492D537608001E2F51 /* FirebaseCore */,
+				BAAAC24B2D537608001E2F51 /* FirebaseFirestore */,
+				BAAAC24D2D537608001E2F51 /* FirebaseStorage */,
 			);
 			productName = ToDoApp;
 			productReference = BAAAC2352D5375B1001E2F51 /* ToDoApp.app */;
@@ -94,6 +109,9 @@
 			);
 			mainGroup = BAAAC22C2D5375B1001E2F51;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BAAAC2362D5375B1001E2F51 /* Products */;
 			projectDirPath = "";
@@ -255,11 +273,12 @@
 				DEVELOPMENT_TEAM = BL2S55ZXWN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Eren To Do";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -284,11 +303,12 @@
 				DEVELOPMENT_TEAM = BL2S55ZXWN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Eren To Do";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -324,6 +344,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.8.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BAAAC2472D537608001E2F51 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		BAAAC2492D537608001E2F51 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		BAAAC24B2D537608001E2F51 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		BAAAC24D2D537608001E2F51 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BAAAC22D2D5375B1001E2F51 /* Project object */;
 }

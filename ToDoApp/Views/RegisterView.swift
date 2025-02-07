@@ -14,6 +14,11 @@ struct RegisterView: View {
 //    @State var password = ""
     
     @StateObject var viewModel = RegisterViewViewModel()
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case name, email, password
+    }
     
     var body: some View {
         
@@ -31,14 +36,15 @@ struct RegisterView: View {
                         }
                         
                         TextField("Kullanıcı Adınız", text: $viewModel.name)
+                            .focused($focusedField, equals: .name)
                             .autocorrectionDisabled()
                             .autocapitalization(.none)
                         TextField("E-Postanız", text: $viewModel.email)
+                            .focused($focusedField, equals: .email)
                             .autocorrectionDisabled()
-                        //oto doldurtmama
                             .autocapitalization(.none)
-                        //baş harfi büyük yaptırmama otomatik
                         SecureField("Şifreniz", text: $viewModel.password)
+                            .focused($focusedField, equals: .password)
                     }
                     
                 }.frame(height: 250)
@@ -46,8 +52,9 @@ struct RegisterView: View {
                 BigButton(title: "Kayıt Ol", action: {viewModel.register() })
                 Spacer()
                 
-               
-                
+            }
+            .onTapGesture {
+                focusedField = nil // Klavyeyi kapat
             }
         }
     }

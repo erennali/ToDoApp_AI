@@ -13,6 +13,11 @@ struct LogInView: View {
 //    @State var password = ""
     
     @StateObject var viewModel = LogInViewViewModel()
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case email, password
+    }
     
     var body: some View {
         NavigationStack {
@@ -26,11 +31,11 @@ struct LogInView: View {
                             .foregroundStyle(.red)
                     }
                     TextField("E Mail Adresiniz", text: $viewModel.email)
+                        .focused($focusedField, equals: .email)
                         .autocorrectionDisabled()
-                    //oto doldurtmama
                         .autocapitalization(.none)
-                    //baş harfi büyük yaptırmama otomatik
                     SecureField("Şifreniz", text: $viewModel.password)
+                        .focused($focusedField, equals: .password)
                 }
                 .frame(height: 200)
                 
@@ -44,6 +49,9 @@ struct LogInView: View {
                 }
                 .padding(.bottom , 100 )
                 
+            }
+            .onTapGesture {
+                focusedField = nil // Klavyeyi kapat
             }
         }
     }

@@ -9,20 +9,21 @@ import SwiftUI
 
 struct MainView: View {
     
-    @StateObject var viewModel = MainViewViewModel()
+    @ObservedObject var viewModel: MainViewViewModel
+    
     var body: some View {
-        if viewModel.isSignedIn,!viewModel.currentUserId.isEmpty{
+        if viewModel.isSignedIn, !viewModel.currentUserId.isEmpty {
             accountView
-        }else{
+        } else {
             LogInView()
         }
     }
     
     @ViewBuilder
     var accountView: some View {
-        TabView{
+        TabView {
             ToDoListView(userId: viewModel.currentUserId)
-                .tabItem{
+                .tabItem {
                     Label("Görevler", systemImage: "house")
                 }
             ProfileView()
@@ -31,9 +32,8 @@ struct MainView: View {
                 }
         }
     }
-    
 }
 
 #Preview {
-    MainView()
+    MainView(viewModel: MainViewViewModel())
 }

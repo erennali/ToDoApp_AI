@@ -42,30 +42,32 @@ struct ProfileView: View {
     @ViewBuilder
     func profile(user: User) -> some View {
         
-        Image(systemName: "person.circle")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .foregroundStyle(Color.blue)
-            .frame(width: 125, height: 125)
-        
-        VStack {
-            HStack {
-                Text("İsim: ")
-                Text(user.name)
+        HStack {
+            Image(systemName: "person.circle")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(Color.gray)
+                .frame(width: 80, height: 80)
+            
+            VStack(alignment: .leading) {
+                HStack {
+                    Text("İsim: ")
+                    Text(user.name)
+                }
+                HStack {
+                    Text("Email: ")
+                    Text(user.email)
+                }
+                HStack {
+                    Text("Kayıt Tarihi: ")
+                    Text("\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))")
+                }
+    
             }
-            HStack {
-                Text("Email: ")
-                Text(user.email)
-            }
-            HStack {
-                Text("Kayıt Tarihi: ")
-                Text("\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))")
-            }
-            HStack {
-                Text("İsim: ")
-                Text(user.name)
-            }
+            
         }
+        
+        
     }
 }
 

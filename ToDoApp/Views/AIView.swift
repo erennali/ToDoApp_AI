@@ -10,7 +10,7 @@ import SwiftUI
 struct AIView: View {
     
     @State private var inputText: String = ""
-    @State private var responseText: String = ""
+    @State private var messages: [ChatMessage] = []
     @State private var isLoading: Bool = false
     @FocusState private var focusedField: Field?
     
@@ -21,57 +21,88 @@ struct AIView: View {
     let aiService = AIService()
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Soru giriş alanı
-            TextField("Sorunuzu yazın...", text: $inputText, axis: .vertical)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocorrectionDisabled()
-                .padding(.horizontal)
-                .focused($focusedField, equals: .textField)
-            
-            // Gönder butonu
-            AsyncButton {
-                isLoading = true
-                responseText = await aiService.getAIResponse(prompt: inputText)
-                isLoading = false
-            } label: {
-                HStack {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .padding(.trailing, 5)
+        VStack(spacing: 0) {
+            // Chat mesajları
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(messages) { message in
+                        MessageBubble(message: message)
                     }
-                    Text(isLoading ? "Yanıt bekleniyor..." : "AI'ya Sor")
                 }
-                .frame(maxWidth: .infinity)
                 .padding()
-                .background(isLoading ? Color.gray : Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .padding(.horizontal)
             }
-            .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             
-            // Yanıt alanı
-            if !responseText.isEmpty {
-                ScrollView {
-                    Text(responseText)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
+            // Alt kısım - mesaj gönderme alanı
+            VStack(spacing: 0) {
+                Divider()
+                HStack(spacing: 12) {
+                    TextField("Mesajınız...", text: $inputText, axis: .vertical)
+                        .textFieldStyle(PlainTextFieldStyle())
                         .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(20)
+                        .focused($focusedField, equals: .textField)
+                    
+                    Button {
+                        sendMessage()
+                    } label: {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .blue)
+                    }
+                    .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
             }
-            
-            Spacer()
+            .background(Color(uiColor: .systemBackground))
         }
-        .padding(.vertical)
-        .navigationTitle("AI Asistan")
-        .background(Color.clear)
+        .navigationTitle("AI Sohbet")
+        .background(Color(uiColor: .systemGroupedBackground))
         .contentShape(Rectangle())
         .onTapGesture {
             focusedField = nil // Klavyeyi kapat
+        }
+    }
+    
+    private func sendMessage() {
+        let userMessage = ChatMessage(content: inputText, isUser: true, timestamp: Date())
+        messages.append(userMessage)
+        let userInput = inputText
+        inputText = ""
+        
+        Task {
+            isLoading = true
+            let response = await aiService.getAIResponse(prompt: userInput)
+            let aiMessage = ChatMessage(content: response, isUser: false, timestamp: Date())
+            messages.append(aiMessage)
+            isLoading = false
+        }
+    }
+}
+
+struct MessageBubble: View {
+    let message: ChatMessage
+    
+    var body: some View {
+        HStack {
+            if message.isUser {
+                Spacer()
+            }
+            
+            Text(message.content)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(message.isUser ? Color.blue : Color(uiColor: .systemBackground))
+                .foregroundColor(message.isUser ? .white : .primary)
+                .cornerRadius(20)
+                .shadow(color: Color(.systemGray4), radius: 1)
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: message.isUser ? .trailing : .leading)
+            
+            if !message.isUser {
+                Spacer()
+            }
         }
     }
 }

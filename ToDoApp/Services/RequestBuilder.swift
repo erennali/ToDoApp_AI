@@ -21,10 +21,11 @@ class RequestBuilder {
         let parameters: [String: Any] = [
             "model": "gpt-3.5-turbo",
             "messages": [
+                ["role": "system", "content": "You are a helpful assistant. Please provide clear and concise responses."],
                 ["role": "user", "content": prompt]
             ],
             "temperature": 0.7,
-            "max_tokens": 150
+            "max_tokens": 500  // Increased token limit for longer responses
         ]
         
         guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {

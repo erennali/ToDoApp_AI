@@ -49,7 +49,7 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
 
 1. Projeyi klonlayın:
 ```bash
-git clone https://github.com/[kullanıcı-adınız]/ToDoApp.git
+git clone https://github.com/erennali/ToDoApp_AI.git
 ```
 
 2. `.env` dosyasını oluşturun ve API anahtarınızı ekleyin:
@@ -70,13 +70,3 @@ API_KEY=your_api_key_here
 3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik eklendi'`)
 4. Branch'inizi push edin (`git push origin feature/YeniÖzellik`)
 5. Pull Request oluşturun
-
-## Lisans 📄
-
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
-
-## İletişim 📱
-
-[İsminiz] - [@twitter_kullanıcı_adınız](https://twitter.com/twitter_kullanıcı_adınız)
-
-Proje Linki: [https://github.com/[kullanıcı-adınız]/ToDoApp](https://github.com/[kullanıcı-adınız]/ToDoApp)

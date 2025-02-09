@@ -21,50 +21,55 @@ struct AIView: View {
     let aiService = AIService()
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Chat mesajları
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
-                    }
-                }
-                .padding()
-            }
-            
-            // Alt kısım - mesaj gönderme alanı
+        NavigationView {
             VStack(spacing: 0) {
-                Divider()
-                HStack(spacing: 12) {
-                    TextField("Mesajınız...", text: $inputText, axis: .vertical)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(20)
-                        .focused($focusedField, equals: .textField)
-                    
-                    Button {
-                        sendMessage()
-                    } label: {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .blue)
+                // Chat mesajları
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(messages) { message in
+                            MessageBubble(message: message)
+                        }
                     }
-                    .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+                    .padding()
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
+                
+                // Alt kısım - mesaj gönderme alanı
+                VStack(spacing: 0) {
+                    Divider()
+                    HStack(spacing: 12) {
+                        TextField("Java dili öğrenmek istiyorum ", text: $inputText, axis: .vertical)
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(20)
+                            .focused($focusedField, equals: .textField)
+                        
+                        Button {
+                            sendMessage()
+                        } label: {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .blue)
+                        }
+                        .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+                .background(Color(uiColor: .systemBackground))
             }
-            .background(Color(uiColor: .systemBackground))
+            .navigationTitle("Ne öğreneceksiniz?")
+            .background(Color(uiColor: .systemGroupedBackground))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                focusedField = nil // Klavyeyi kapat
+            }
         }
-        .navigationTitle("AI Sohbet")
-        .background(Color(uiColor: .systemGroupedBackground))
-        .contentShape(Rectangle())
-        .onTapGesture {
-            focusedField = nil // Klavyeyi kapat
-        }
+        
+        
     }
+    
     
     private func sendMessage() {
         let userMessage = ChatMessage(content: inputText, isUser: true, timestamp: Date())
@@ -75,10 +80,23 @@ struct AIView: View {
         Task {
             isLoading = true
             let response = await aiService.getAIResponse(prompt: userInput)
-            let aiMessage = ChatMessage(content: response, isUser: false, timestamp: Date())
-            messages.append(aiMessage)
-            isLoading = false
-        }
+            
+            // Gelen yanıtı paragraflara bölelim
+            let paragraphs = response.split(separator: "\n").map { String($0) }
+            
+            // Her paragrafı tek tek ekleyelim
+               for paragraph in paragraphs {
+                   // Paragrafın başındaki ve sonundaki boşlukları temizleyelim
+                   let cleanedParagraph = paragraph.trimmingCharacters(in: .whitespacesAndNewlines)
+                   
+                   if !cleanedParagraph.isEmpty {
+                       let aiMessage = ChatMessage(content: cleanedParagraph, isUser: false, timestamp: Date())
+                       messages.append(aiMessage)
+                   }
+               }
+               
+               isLoading = false
+           }
     }
 }
 
@@ -91,14 +109,26 @@ struct MessageBubble: View {
                 Spacer()
             }
             
-            Text(message.content)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(message.isUser ? Color.blue : Color(uiColor: .systemBackground))
-                .foregroundColor(message.isUser ? .white : .primary)
-                .cornerRadius(20)
-                .shadow(color: Color(.systemGray4), radius: 1)
-                .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: message.isUser ? .trailing : .leading)
+            HStack {
+                Text(message.content)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(message.isUser ? Color.blue : Color.gray)
+                    .foregroundColor(message.isUser ? .white : .primary)
+                    .cornerRadius(20)
+                    .shadow(color: Color(.systemGray4), radius: 1)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.75, alignment: message.isUser ? .trailing : .leading)
+                if(!message.isUser && message.content.starts(with: "Adım")){
+                    Button {
+                        //To do eklemeye yönlendirecek
+                    } label: {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 20))
+                            
+                           
+                    }
+                }
+            }
             
             if !message.isUser {
                 Spacer()

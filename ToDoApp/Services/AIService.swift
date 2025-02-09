@@ -20,7 +20,7 @@ class AIService {
             return apiKeyMissingMessage
         }
         
-        guard let request = requestBuilder.buildRequest(prompt: prompt, url: url, apiKey: apiKey) else {
+        guard let request = requestBuilder.buildRequest(prompt: "Bana 5 adımda \(prompt) öğrenmek için öğretici ve sıralı bir yapılacaklar listesi oluştur. Her adımda, gerekli araçlar, kaynak önerileri ve başlangıç noktaları ver ve bunların ortalama kaç hafta süreceği aralığı da yaz ve yanıtını 2000 karakteri geçmeyecek şekilde özetle ve sadece Adımları yazdır , en son bir öneride sakın bulunma", url: url, apiKey: apiKey) else {
             print("[Error] Failed to build request")
             return errorMesage
         }

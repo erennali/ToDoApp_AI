@@ -25,7 +25,7 @@ class RequestBuilder {
                 ["role": "user", "content": prompt]
             ],
             "temperature": 0.7,
-            "max_tokens": 500  // Increased token limit for longer responses
+            "max_tokens": 1000  // Increased token limit for longer responses
         ]
         
         guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {

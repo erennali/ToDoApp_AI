@@ -8,11 +8,7 @@
 import Foundation
 
 class RequestBuilder {
-    private var apiKey: String {
-        EnvironmentManager.openAIApiKey
-    }
-    
-    func buildRequest(prompt: String, url: URL?) -> URLRequest? {
+    func buildRequest(prompt: String, url: URL?, apiKey: String) -> URLRequest? {
         guard let apiURL = url else {
             return nil
         }

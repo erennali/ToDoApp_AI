@@ -12,10 +12,15 @@ class AIService {
     private let networkManager = NetworkManager()
     private let requestBuilder = RequestBuilder()
     private let errorMesage = "Error: Unable to generative AI response"
+    private let apiKeyMissingMessage = "API anahtarı bulunamadı. Lütfen OpenAI API anahtarınızı ayarlayın."
     private let url = URL(string: "https://api.openai.com/v1/chat/completions")
     
     func getAIResponse(prompt: String) async -> String {
-        guard let request = requestBuilder.buildRequest(prompt: prompt, url: url) else {
+        guard let apiKey = EnvironmentManager.apiKey else {
+            return apiKeyMissingMessage
+        }
+        
+        guard let request = requestBuilder.buildRequest(prompt: prompt, url: url, apiKey: apiKey) else {
             print("[Error] Failed to build request")
             return errorMesage
         }

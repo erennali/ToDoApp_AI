@@ -18,10 +18,17 @@ struct NewItemView: View {
                 .padding(.top,70)
             Form {
                 TextField("Başlık", text:$viewModel.title)
+                    .padding(.bottom)
                 TextField("Açıklama", text:$viewModel.description,axis: .vertical)
+                    .frame(height: 170 ,alignment: .topLeading)
+                    .multilineTextAlignment(.leading)
+                    
                     
                 DatePicker("Bitiş Tarihi",selection: $viewModel.dueDate)
-                    .datePickerStyle(.graphical)
+                    .datePickerStyle(.compact)
+                    
+                    
+                
                 BigButton(title: "Kaydet"){
                     if viewModel.canSave {
                         viewModel.save()
@@ -31,6 +38,7 @@ struct NewItemView: View {
                     }
                    
                 }
+                .padding(.top)
                 
             }
             .alert(isPresented: $viewModel.showAlert) {

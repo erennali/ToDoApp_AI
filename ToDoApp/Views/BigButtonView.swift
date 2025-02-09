@@ -24,7 +24,7 @@ struct BigButton: View {
             }
             }).frame(height: 50)
             .padding(.horizontal)
-        Spacer()
+            .padding(.bottom)
     }
 }
 

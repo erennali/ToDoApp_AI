@@ -12,4 +12,15 @@ struct User : Codable {
     let name : String
     let email : String
     let joined : TimeInterval
+    var aiMessageQuota: Int
+    
+    func asDictionary() -> [String: Any] {
+        return [
+            "id": id,
+            "name": name,
+            "email": email,
+            "joined": joined,
+            "aiMessageQuota": aiMessageQuota
+        ]
+    }
 }

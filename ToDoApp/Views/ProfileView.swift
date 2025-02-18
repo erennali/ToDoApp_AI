@@ -40,6 +40,15 @@ struct ProfileView: View {
                                     }
                                 }
                                 
+                                // AI Mesaj Kotası Kartı
+                                profileCard {
+                                    infoRow(
+                                        icon: "brain.head.profile",
+                                        title: "AI Mesaj Hakkı",
+                                        value: "\(user.aiMessageQuota) mesaj"
+                                    )
+                                }
+                                
                                 // Katılım Bilgisi Kartı
                                 profileCard {
                                     infoRow(
@@ -77,10 +86,13 @@ struct ProfileView: View {
                         }
                         .padding(.top, 20)
                     }
-                } else {
-                    ProgressView()
+                } else if viewModel.isLoading {
+                    ProgressView("Yükleniyor...")
                         .scaleEffect(1.5)
                         .tint(.blue)
+                } else {
+                    Text("Kullanıcı bilgileri yüklenemedi")
+                        .foregroundColor(.gray)
                 }
             }
             .navigationTitle("Profil")

@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import FirebaseFirestore
+import FirebaseAuth
 
 class AIViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -14,18 +16,27 @@ class AIViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var selectedMessage: String = ""
     @Published var showNewItem: Bool = false
+    @Published var aiMessageQuota: Int = 0
+    @Published var showQuotaAlert: Bool = false
     
     // MARK: - Private Properties
     private let aiService: AIService
+    private let db = Firestore.firestore()
     
     // MARK: - Init
     init(aiService: AIService = AIService()) {
         self.aiService = aiService
+        fetchQuota()
     }
     
     // MARK: - Public Methods
     func sendMessage() {
         guard !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        if aiMessageQuota <= 0 {
+            showQuotaAlert = true
+            return
+        }
         
         let userMessage = ChatMessage(content: inputText, isUser: true, timestamp: Date())
         messages.append(userMessage)
@@ -37,14 +48,32 @@ class AIViewModel: ObservableObject {
         }
     }
     
-    func getCleanedSelectedMessage() -> String {
-        return selectedMessage
-            .replacingOccurrences(of: "Adım 1: ", with: "")
-            .replacingOccurrences(of: "Adım 2: ", with: "")
-            .replacingOccurrences(of: "Adım 3: ", with: "")
-            .replacingOccurrences(of: "Adım 4: ", with: "")
-            .replacingOccurrences(of: "Adım 5: ", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+    private func fetchQuota() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("users")
+            .document(userId)
+            .getDocument { [weak self] snapshot, error in
+                guard let data = snapshot?.data(), error == nil else { return }
+                
+                DispatchQueue.main.async {
+                    self?.aiMessageQuota = data["aiMessageQuota"] as? Int ?? 0
+                }
+            }
+    }
+    
+    private func decrementQuota() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("users")
+            .document(userId)
+            .updateData(["aiMessageQuota": FieldValue.increment(Int64(-1))]) { [weak self] error in
+                if error == nil {
+                    DispatchQueue.main.async {
+                        self?.aiMessageQuota -= 1
+                    }
+                }
+            }
     }
     
     // MARK: - Private Methods
@@ -66,6 +95,17 @@ class AIViewModel: ObservableObject {
             }
         }
         
+        decrementQuota()
         isLoading = false
+    }
+    
+    func getCleanedSelectedMessage() -> String {
+        return selectedMessage
+            .replacingOccurrences(of: "Adım 1: ", with: "")
+            .replacingOccurrences(of: "Adım 2: ", with: "")
+            .replacingOccurrences(of: "Adım 3: ", with: "")
+            .replacingOccurrences(of: "Adım 4: ", with: "")
+            .replacingOccurrences(of: "Adım 5: ", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 } 

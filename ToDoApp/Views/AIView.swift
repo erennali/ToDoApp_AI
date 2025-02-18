@@ -26,6 +26,15 @@ struct AIView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // Quota indicator
+                HStack {
+                    Spacer()
+                    Text("Kalan AI Mesaj Hakkı: \(viewModel.aiMessageQuota)")
+                        .foregroundColor(.gray)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                }
+                
                 chatMessagesView
                 messageInputView
             }
@@ -40,6 +49,11 @@ struct AIView: View {
                     newItemPresented: $viewModel.showNewItem,
                     alinanMetin: viewModel.getCleanedSelectedMessage()
                 )
+            }
+            .alert("Mesaj Hakkınız Bitti", isPresented: $viewModel.showQuotaAlert) {
+                Button("Tamam", role: .cancel) { }
+            } message: {
+                Text("AI mesaj gönderme hakkınız kalmadı.")
             }
         }
     }

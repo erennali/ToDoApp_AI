@@ -10,25 +10,44 @@ import FirebaseFirestore
 
 class ProfileViewViewModel : ObservableObject {
     @Published var user : User? = nil
-    init () {
-        
+    @Published var isLoading = true
+    
+    init() {
+        fetchUser()
     }
+    
     func fetchUser() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+        isLoading = true
+        guard let userId = Auth.auth().currentUser?.uid else {
+            isLoading = false
+            return
+        }
         
-        let db = Firestore.firestore( )
+        let db = Firestore.firestore()
         db.collection("users")
             .document(userId)
             .getDocument { [weak self] snapshot, error in
-                guard let data = snapshot?.data(),error == nil else { return }
-                
                 DispatchQueue.main.async {
-                    self?.user = User (
+                    if let error = error {
+                        print("Error fetching user: \(error)")
+                        self?.isLoading = false
+                        return
+                    }
+                    
+                    guard let data = snapshot?.data() else {
+                        print("No user data found")
+                        self?.isLoading = false
+                        return
+                    }
+                    
+                    self?.user = User(
                         id: data["id"] as? String ?? "",
                         name: data["name"] as? String ?? "",
                         email: data["email"] as? String ?? "",
-                        joined: data["joined"] as? TimeInterval ?? 0
+                        joined: data["joined"] as? TimeInterval ?? 0,
+                        aiMessageQuota: data["aiMessageQuota"] as? Int ?? 0
                     )
+                    self?.isLoading = false
                 }
             }
     }
@@ -36,7 +55,7 @@ class ProfileViewViewModel : ObservableObject {
     func logOut() {
         do {
             try Auth.auth().signOut()
-        }catch {
+        } catch {
             print(error)
         }
     }

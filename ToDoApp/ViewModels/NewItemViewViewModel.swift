@@ -13,6 +13,7 @@ class NewItemViewViewModel : ObservableObject {
     @Published var dueDate = Date()
     @Published var showAlert = false
     @Published var description = ""
+    @Published var onClock: Bool = false
     
     init () {
         
@@ -29,7 +30,7 @@ class NewItemViewViewModel : ObservableObject {
         }
         
         let newItemId = UUID().uuidString
-        let newItem = ToDoListItem(id: newItemId, title: title, description: description , dueDate: dueDate.timeIntervalSince1970, createdDate: Date().timeIntervalSince1970, isDone: false)
+        let newItem = ToDoListItem(id: newItemId, title: title, description: description , dueDate: dueDate.timeIntervalSince1970, createdDate: Date().timeIntervalSince1970, isDone: false , onClock: onClock)
         
         let db = Firestore.firestore()
         db.collection("users")

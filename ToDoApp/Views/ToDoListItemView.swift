@@ -33,6 +33,6 @@ struct ToDoListItemView: View {
 
 #Preview {
     ToDoListItemView(item: .init(
-        id: "123", title: "Abone Ol", description: "", dueDate: Date().timeIntervalSince1970, createdDate: Date().timeIntervalSince1970, isDone: false
+        id: "123", title: "Abone Ol", description: "", dueDate: Date().timeIntervalSince1970, createdDate: Date().timeIntervalSince1970, isDone: false , onClock: true
     ))
 }

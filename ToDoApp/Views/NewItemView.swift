@@ -10,6 +10,8 @@ import SwiftUI
 struct NewItemView: View {
     @Binding var newItemPresented : Bool
     @StateObject var viewModel = NewItemViewViewModel()
+    
+    
     var body: some View {
         VStack {
             Text("Yeni Görev")
@@ -27,7 +29,11 @@ struct NewItemView: View {
                 DatePicker("Bitiş Tarihi",selection: $viewModel.dueDate)
                     .datePickerStyle(.compact)
                     
-                    
+                Toggle(
+                        "Alarm Kur",
+                        systemImage: "clock.badge",
+                        isOn: $viewModel.onClock
+                    )
                 
                 BigButton(title: "Kaydet"){
                     if viewModel.canSave {

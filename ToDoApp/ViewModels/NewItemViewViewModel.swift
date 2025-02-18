@@ -15,10 +15,9 @@ class NewItemViewViewModel : ObservableObject {
     @Published var description = ""
     @Published var onClock: Bool = false
     
-    init () {
-        
-    }
-    
+    init(initialTitle: String = "") {
+            self.title = initialTitle // Başlangıç değeri ataması
+        }
     
     func save() {
         guard canSave else {

@@ -9,7 +9,19 @@ import SwiftUI
 
 struct NewItemView: View {
     @Binding var newItemPresented : Bool
-    @StateObject var viewModel = NewItemViewViewModel()
+    @StateObject private var viewModel: NewItemViewViewModel
+    let alinanMetin: String // Constructor'dan alınan veri
+    
+    
+    init(newItemPresented: Binding<Bool>, alinanMetin: String) {
+            self._newItemPresented = newItemPresented
+            self.alinanMetin = alinanMetin
+            
+            // ViewModel'i alınan metinle başlat
+            _viewModel = StateObject(
+                wrappedValue: NewItemViewViewModel(initialTitle: alinanMetin)
+            )
+        }
     
     
     var body: some View {
@@ -19,8 +31,9 @@ struct NewItemView: View {
                 .bold()
                 .padding(.top,70)
             Form {
-                TextField("Başlık", text:$viewModel.title)
+                TextField("Başlık",text:$viewModel.title)
                     .padding(.bottom)
+                 
                 TextField("Açıklama", text:$viewModel.description,axis: .vertical)
                     .frame(height: 170 ,alignment: .topLeading)
                     .multilineTextAlignment(.leading)
@@ -60,5 +73,5 @@ struct NewItemView: View {
         return true
     }, set: { _ in
         
-    }))
+    }), alinanMetin: "Test")
 }

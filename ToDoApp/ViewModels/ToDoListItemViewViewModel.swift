@@ -10,13 +10,14 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class ToDoListItemViewViewModel : ObservableObject {
-    init () {
-        
-    }
+    @Published var isDone: Bool = false
+    private var item: ToDoListItem?
     
-    func toggleIsDone (item : ToDoListItem) {
-        var itemCopy = item
-        itemCopy.setDone(!item.isDone)
+    init() {}
+    
+    func toggleIsDone(item: ToDoListItem) {
+        self.item = item
+        self.isDone = !item.isDone
         
         guard let uid = Auth.auth().currentUser?.uid else {
             return
@@ -27,7 +28,14 @@ class ToDoListItemViewViewModel : ObservableObject {
             .document(uid)
             .collection("todos")
             .document(item.id)
-            .updateData(["isDone": !item.isDone])
+            .updateData(["isDone": self.isDone]) { [weak self] error in
+                if let error = error {
+                    print("Error updating document: \(error)")
+                    // Revert the local state if update fails
+                    DispatchQueue.main.async {
+                        self?.isDone = !self!.isDone
+                    }
+                }
+            }
     }
-    
 }

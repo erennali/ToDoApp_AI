@@ -8,58 +8,84 @@
 import SwiftUI
 
 struct RegisterView: View {
-    
-//    @State var name = ""
-//    @State var email = ""
-//    @State var password = ""
-    
     @StateObject var viewModel = RegisterViewViewModel()
-    @FocusState private var focusedField: Field?
-    
-    enum Field {
-        case name, email, password
-    }
+    @FocusState private var focusedField: AuthField?
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        
-        NavigationStack {
+        ZStack {
+            // Background gradient
+            AuthBackgroundView()
             
-            VStack {
-                HeaderView()
-                //Register
-                
-                Form {
-                    Section(header: Text("Kayıt Formu")) {
-                        if !viewModel.errorMessage.isEmpty {
-                            Text(viewModel.errorMessage)
-                                .foregroundStyle(.red)
-                        }
-                        
-                        TextField("Kullanıcı Adınız", text: $viewModel.name)
-                            .focused($focusedField, equals: .name)
-                            .autocorrectionDisabled()
-                            .autocapitalization(.none)
-                        TextField("E-Postanız", text: $viewModel.email)
-                            .focused($focusedField, equals: .email)
-                            .autocorrectionDisabled()
-                            .autocapitalization(.none)
-                        SecureField("Şifreniz", text: $viewModel.password)
-                            .focused($focusedField, equals: .password)
-                    }
+            ScrollView {
+                VStack(spacing: 25) {
+                    HeaderView()
+                        .padding(.bottom, 20)
                     
-                }.frame(height: 250)
-                
-                BigButton(title: "Kayıt Ol", action: {viewModel.register() })
-                Spacer()
-                
+                    // Register Form
+                    AuthFormCard(
+                        title: "Kayıt Formu",
+                        errorMessage: viewModel.errorMessage
+                    ) {
+                        VStack(spacing: 15) {
+                            // Name Field
+                            AuthInputField(
+                                icon: "person.fill",
+                                placeholder: "Kullanıcı Adınız",
+                                text: $viewModel.name,
+                                field: .name,
+                                focusedField: $focusedField
+                            )
+                            
+                            // Email Field
+                            AuthInputField(
+                                icon: "envelope.fill",
+                                placeholder: "E-Postanız",
+                                text: $viewModel.email,
+                                field: .email,
+                                focusedField: $focusedField
+                            )
+                            
+                            // Password Field
+                            AuthInputField(
+                                icon: "lock.fill",
+                                placeholder: "Şifreniz",
+                                text: $viewModel.password,
+                                field: .password,
+                                isSecure: true,
+                                focusedField: $focusedField
+                            )
+                            
+                            // Register Button
+                            AuthButton(
+                                title: "Kayıt Ol",
+                                icon: "person.badge.plus.fill",
+                                action: viewModel.register,
+                                isLoading: viewModel.isLoading
+                            )
+                        }
+                    }
+                }
+                .padding(.vertical, 20)
             }
-            .onTapGesture {
-                focusedField = nil // Klavyeyi kapat
-            }
+        }
+        .navigationTitle("Yeni Hesap")
+        .navigationBarTitleDisplayMode(.inline)
+        .onTapGesture {
+            focusedField = nil
+        }
+        .alert(isPresented: $viewModel.showAlert) {
+            Alert(
+                title: Text(viewModel.alertTitle),
+                message: Text(viewModel.alertMessage),
+                dismissButton: .default(Text("Tamam"))
+            )
         }
     }
 }
 
 #Preview {
-    RegisterView()
+    NavigationStack {
+        RegisterView()
+    }
 }

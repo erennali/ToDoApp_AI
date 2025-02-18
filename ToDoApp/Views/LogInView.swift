@@ -8,50 +8,82 @@
 import SwiftUI
 
 struct LogInView: View {
-    
-//    @State var email = ""
-//    @State var password = ""
-    
     @StateObject var viewModel = LogInViewViewModel()
-    @FocusState private var focusedField: Field?
-    
-    enum Field {
-        case email, password
-    }
+    @FocusState private var focusedField: AuthField?
     
     var body: some View {
         NavigationStack {
-            VStack {
-                //Header
-                HeaderView()
-                //Form
-                Form {
-                    if !viewModel.errorMessage.isEmpty {
-                        Text(viewModel.errorMessage)
-                            .foregroundStyle(.red)
+            ZStack {
+                // Background gradient
+                AuthBackgroundView()
+                
+                ScrollView {
+                    VStack(spacing: 25) {
+                        HeaderView()
+                            .padding(.bottom, 20)
+                        
+                        // Login Form
+                        AuthFormCard(
+                            title: "Giriş",
+                            errorMessage: viewModel.errorMessage
+                        ) {
+                            VStack(spacing: 15) {
+                                // Email Field
+                                AuthInputField(
+                                    icon: "envelope.fill",
+                                    placeholder: "E Mail Adresiniz",
+                                    text: $viewModel.email,
+                                    field: .email,
+                                    focusedField: $focusedField
+                                )
+                                
+                                // Password Field
+                                AuthInputField(
+                                    icon: "lock.fill",
+                                    placeholder: "Şifreniz",
+                                    text: $viewModel.password,
+                                    field: .password,
+                                    isSecure: true,
+                                    focusedField: $focusedField
+                                )
+                                
+                                // Login Button
+                                AuthButton(
+                                    title: "Giriş Yap",
+                                    icon: "arrow.right.circle.fill",
+                                    action: viewModel.login,
+                                    isLoading: viewModel.isLoading
+                                )
+                            }
+                        }
+                        
+                        // Register Link
+                        VStack(spacing: 10) {
+                            Text("Hesabınız yok mu?")
+                                .foregroundColor(.gray)
+                            NavigationLink {
+                                RegisterView()
+                            } label: {
+                                Text("Yeni Hesap Oluştur")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .padding(.top, 20)
                     }
-                    TextField("E Mail Adresiniz", text: $viewModel.email)
-                        .focused($focusedField, equals: .email)
-                        .autocorrectionDisabled()
-                        .autocapitalization(.none)
-                    SecureField("Şifreniz", text: $viewModel.password)
-                        .focused($focusedField, equals: .password)
+                    .padding(.vertical, 20)
                 }
-                .frame(height: 200)
-                
-                BigButton(title: "Giriş Yap", action: viewModel.login)
-                
-                //Footer
-                
-                VStack {
-                    Text("Hesabınız yok mu?")
-                    NavigationLink("Yeni Hesap Oluştur", destination: RegisterView())
-                }
-                .padding(.bottom , 100 )
-                
             }
+            .navigationBarHidden(true)
             .onTapGesture {
-                focusedField = nil // Klavyeyi kapat
+                focusedField = nil
+            }
+            .alert(isPresented: $viewModel.showAlert) {
+                Alert(
+                    title: Text(viewModel.alertTitle),
+                    message: Text(viewModel.alertMessage),
+                    dismissButton: .default(Text("Tamam"))
+                )
             }
         }
     }

@@ -74,21 +74,37 @@ class LogInViewViewModel: ObservableObject {
     
     private func handleFirebaseError(_ error: Error) -> String {
         let err = error as NSError
-        switch err.code {
-        case AuthErrorCode.wrongPassword.rawValue:
-            return "E-posta veya şifre hatalı!"
-        case AuthErrorCode.invalidEmail.rawValue:
-            return "Geçersiz e-posta adresi!"
-        case AuthErrorCode.userNotFound.rawValue:
-            return "Kullanıcı bulunamadı!"
-        case AuthErrorCode.userDisabled.rawValue:
-            return "Hesabınız devre dışı bırakılmış!"
-        case AuthErrorCode.tooManyRequests.rawValue:
-            return "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin!"
-        case AuthErrorCode.networkError.rawValue:
-            return "İnternet bağlantınızı kontrol edin!"
-        default:
-            return "Giriş yapılırken bir hata oluştu: \(error.localizedDescription)"
+        print("Firebase Error Code: \(err.code)")
+        print("Firebase Error Domain: \(err.domain)")
+        print("Firebase Error Description: \(err.localizedDescription)")
+        
+        if let errCode = AuthErrorCode(rawValue: err.code) {
+            switch errCode {
+            case .wrongPassword:
+                return "Girdiğiniz şifre yanlış! Lütfen şifrenizi kontrol edip tekrar deneyin. Şifrenizi unuttuysanız 'Şifremi Unuttum' seçeneğini kullanabilirsiniz."
+            case .invalidEmail:
+                return "Girdiğiniz e-posta adresi geçersiz! Lütfen doğru formatta bir e-posta adresi girdiğinizden emin olun."
+            case .userNotFound:
+                return "Bu e-posta adresiyle kayıtlı bir hesap bulunamadı! Eğer yeni bir kullanıcıysanız, lütfen önce kayıt olun."
+            case .userDisabled:
+                return "Hesabınız güvenlik nedeniyle devre dışı bırakılmış! Lütfen destek ekibiyle iletişime geçin."
+            case .tooManyRequests:
+                return "Çok fazla başarısız giriş denemesi yaptınız. Güvenliğiniz için lütfen bir süre bekleyip tekrar deneyin."
+            case .networkError:
+                return "İnternet bağlantınızda bir sorun var! Lütfen bağlantınızı kontrol edip tekrar deneyin."
+            case .invalidCredential:
+                return "Girdiğiniz şifre yanlış! Lütfen şifrenizi kontrol edip tekrar deneyin."
+            default:
+                return "Giriş yapılırken bir hata oluştu: \(err.localizedDescription)"
+            }
         }
+        
+        // Eğer AuthErrorCode'a dönüştürülemezse, error message'a göre kontrol edelim
+        let errorMessage = err.localizedDescription.lowercased()
+        if errorMessage.contains("credential is malformed") || errorMessage.contains("wrong password") {
+            return "Girdiğiniz şifre yanlış! Lütfen şifrenizi kontrol edip tekrar deneyin."
+        }
+        
+        return "Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edip tekrar deneyin."
     }
 }

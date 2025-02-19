@@ -77,7 +77,7 @@ class ToDoListViewViewModel: ObservableObject {
         db.collection("users")
             .document(userId)
             .collection("todos")
-            .addSnapshotListener { [weak self] snapshot, error in
+            .addSnapshotListener { snapshot, error in
                 guard let documents = snapshot?.documents, error == nil else {
                     print("Error fetching tasks for notification: \(error?.localizedDescription ?? "Unknown error")")
                     return
@@ -86,7 +86,7 @@ class ToDoListViewViewModel: ObservableObject {
                 let calendar = Calendar.current
                 let now = Date()
                 let todayStart = calendar.startOfDay(for: now)
-                let todayEnd = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+               
                 
                 let todayTasks = documents.filter { document in
                     if let dueDate = document.data()["dueDate"] as? TimeInterval,

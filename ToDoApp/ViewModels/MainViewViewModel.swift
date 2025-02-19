@@ -31,10 +31,26 @@ class MainViewViewModel : ObservableObject {
                         self?.isSignedIn = false
                     }
                 } else {
-                    // Kullanıcı hala geçerli
-                    DispatchQueue.main.async {
-                        self?.currentUserId = currentUser.uid
-                        self?.isSignedIn = true
+                    // E-posta doğrulaması kontrolü
+                    if !currentUser.isEmailVerified {
+                        // E-posta doğrulanmamış, çıkış yap
+                        try? Auth.auth().signOut()
+                        DispatchQueue.main.async {
+                            self?.currentUserId = ""
+                            self?.isSignedIn = false
+                        }
+                        // Yeni doğrulama e-postası gönder
+                        currentUser.sendEmailVerification { error in
+                            if let error = error {
+                                print("Error sending verification email: \(error.localizedDescription)")
+                            }
+                        }
+                    } else {
+                        // Kullanıcı hala geçerli ve e-posta doğrulanmış
+                        DispatchQueue.main.async {
+                            self?.currentUserId = currentUser.uid
+                            self?.isSignedIn = true
+                        }
                     }
                 }
             }
@@ -60,9 +76,23 @@ class MainViewViewModel : ObservableObject {
                             self?.isSignedIn = false
                             try? Auth.auth().signOut()
                         } else {
-                            // Kullanıcı hala geçerli
-                            self?.currentUserId = user.uid
-                            self?.isSignedIn = true
+                            // E-posta doğrulaması kontrolü
+                            if !user.isEmailVerified {
+                                // E-posta doğrulanmamış, çıkış yap
+                                try? Auth.auth().signOut()
+                                self?.currentUserId = ""
+                                self?.isSignedIn = false
+                                // Yeni doğrulama e-postası gönder
+                                user.sendEmailVerification { error in
+                                    if let error = error {
+                                        print("Error sending verification email: \(error.localizedDescription)")
+                                    }
+                                }
+                            } else {
+                                // Kullanıcı hala geçerli ve e-posta doğrulanmış
+                                self?.currentUserId = user.uid
+                                self?.isSignedIn = true
+                            }
                         }
                     }
                 }

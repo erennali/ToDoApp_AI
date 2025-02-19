@@ -50,7 +50,19 @@ class RegisterViewViewModel: ObservableObject {
                     return
                 }
                 
+                // Send email verification
+                result?.user.sendEmailVerification { [weak self] error in
+                    if let error = error {
+                        print("Email verification error: \(error.localizedDescription)")
+                    }
+                }
+                
                 self?.insertUserRecord(id: userId)
+                
+                // Show success message with verification instructions
+                self?.showAlert = true
+                self?.alertTitle = "Başarılı"
+                self?.alertMessage = "Kayıt işlemi başarılı! Lütfen e-posta adresinize gönderilen doğrulama linkine tıklayarak hesabınızı onaylayın."
             }
         }
     }

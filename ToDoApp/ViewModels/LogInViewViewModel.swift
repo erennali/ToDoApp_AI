@@ -40,6 +40,23 @@ class LogInViewViewModel: ObservableObject {
                     self?.showAlert = true
                     self?.alertTitle = "Hata"
                     self?.alertMessage = self?.errorMessage ?? ""
+                    return
+                }
+                
+                // E-posta doğrulama kontrolü
+                guard let user = result?.user else { return }
+                
+                if !user.isEmailVerified {
+                    // E-posta doğrulanmamış, çıkış yap
+                    try? Auth.auth().signOut()
+                    
+                    DispatchQueue.main.async {
+                        self?.errorMessage = "E-posta adresiniz henüz doğrulanmamış. Lütfen e-posta kutunuzu ve spam klasörünüzü kontrol edin.\n\nEğer doğrulama e-postası almadıysanız, yeni bir doğrulama e-postası isteyebilirsiniz."
+                        self?.showAlert = true
+                        self?.alertTitle = "E-posta Doğrulaması Gerekli"
+                        self?.alertMessage = self?.errorMessage ?? ""
+                    }
+                    return
                 }
             }
         }
@@ -106,5 +123,51 @@ class LogInViewViewModel: ObservableObject {
         }
         
         return "Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edip tekrar deneyin."
+    }
+    
+    func resendVerificationEmail() {
+        guard let user = Auth.auth().currentUser else {
+            errorMessage = "Önce giriş yapmanız gerekiyor."
+            showAlert = true
+            alertTitle = "Hata"
+            alertMessage = errorMessage
+            return
+        }
+        
+        // Son doğrulama e-postası gönderme zamanını kontrol et
+        let lastEmailSentKey = "lastVerificationEmailSent_\(user.uid)"
+        let currentTime = Date().timeIntervalSince1970
+        
+        if let lastSentTime = UserDefaults.standard.double(forKey: lastEmailSentKey) as Double?,
+           currentTime - lastSentTime < 60 { // 60 saniye bekle
+            errorMessage = "Lütfen yeni bir doğrulama e-postası göndermek için biraz bekleyin."
+            showAlert = true
+            alertTitle = "Uyarı"
+            alertMessage = errorMessage
+            return
+        }
+        
+        user.sendEmailVerification { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    if (error as NSError).code == 17010 { // Çok fazla istek hatası
+                        self?.errorMessage = "Çok fazla doğrulama e-postası isteği gönderildi. Lütfen bir süre bekleyip tekrar deneyin."
+                    } else {
+                        self?.errorMessage = "Doğrulama e-postası gönderilirken bir hata oluştu: \(error.localizedDescription)"
+                    }
+                    self?.showAlert = true
+                    self?.alertTitle = "Hata"
+                    self?.alertMessage = self?.errorMessage ?? ""
+                } else {
+                    // Başarılı gönderim zamanını kaydet
+                    UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: lastEmailSentKey)
+                    
+                    self?.errorMessage = "Yeni doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu ve spam klasörünüzü kontrol edin."
+                    self?.showAlert = true
+                    self?.alertTitle = "Başarılı"
+                    self?.alertMessage = self?.errorMessage ?? ""
+                }
+            }
+        }
     }
 }

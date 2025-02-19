@@ -79,11 +79,21 @@ struct LogInView: View {
                 focusedField = nil
             }
             .alert(isPresented: $viewModel.showAlert) {
-                Alert(
-                    title: Text(viewModel.alertTitle),
-                    message: Text(viewModel.alertMessage),
-                    dismissButton: .default(Text("Tamam"))
-                )
+                if viewModel.alertTitle == "E-posta Doğrulaması Gerekli" {
+                    Alert(
+                        title: Text(viewModel.alertTitle),
+                        message: Text(viewModel.alertMessage),
+                        primaryButton: .default(Text("Tamam")),
+                        secondaryButton: .default(Text("Yeni Doğrulama E-postası Gönder"), 
+                                                action: viewModel.resendVerificationEmail)
+                    )
+                } else {
+                    Alert(
+                        title: Text(viewModel.alertTitle),
+                        message: Text(viewModel.alertMessage),
+                        dismissButton: .default(Text("Tamam"))
+                    )
+                }
             }
         }
     }

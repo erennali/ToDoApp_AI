@@ -10,7 +10,7 @@ import PhotosUI
 import FirebaseStorage
 
 struct ProfileView: View {
-    @StateObject var viewModel = ProfileViewViewModel()
+    @StateObject var viewModel = ProfileViewViewModel.shared
     @State private var showImagePicker = false
     @State private var selectedImage: PhotosPickerItem?
     @State private var profileImage: Image?
@@ -102,9 +102,6 @@ struct ProfileView: View {
             }
             .navigationTitle("Profil")
             .navigationBarTitleDisplayMode(.large)
-        }
-        .onAppear {
-            viewModel.fetchUser()
         }
     }
     

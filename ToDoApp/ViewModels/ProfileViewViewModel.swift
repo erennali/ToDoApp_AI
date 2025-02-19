@@ -15,37 +15,57 @@ class ProfileViewViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var profileImage: UIImage?
     @Published var isImageUploading = false
+    
     private let storage = Storage.storage().reference()
+    private let db = Firestore.firestore()
+    private var authStateListener: AuthStateDidChangeListenerHandle?
+    
+    static let shared = ProfileViewViewModel()
     
     init() {
-        fetchUser()
+        setupAuthStateListener()
     }
     
-    func fetchUser() {
-        isLoading = true
-        guard let userId = Auth.auth().currentUser?.uid else {
-            isLoading = false
-            return
+    private func setupAuthStateListener() {
+        authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            if let userId = user?.uid {
+                self?.fetchUserData(userId: userId)
+            } else {
+                DispatchQueue.main.async {
+                    self?.clearUserData()
+                }
+            }
         }
+    }
+    
+    private func clearUserData() {
+        user = nil
+        profileImage = nil
+        isLoading = false
+    }
+    
+    private func fetchUserData(userId: String) {
+        isLoading = true
         
-        let db = Firestore.firestore()
         db.collection("users")
             .document(userId)
             .getDocument { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error fetching user: \(error.localizedDescription)")
+                    self.handleError()
+                    return
+                }
+                
+                guard let data = snapshot?.data() else {
+                    print("No user data found")
+                    self.handleError()
+                    return
+                }
+                
                 DispatchQueue.main.async {
-                    if let error = error {
-                        print("Error fetching user: \(error)")
-                        self?.isLoading = false
-                        return
-                    }
-                    
-                    guard let data = snapshot?.data() else {
-                        print("No user data found")
-                        self?.isLoading = false
-                        return
-                    }
-                    
-                    self?.user = User(
+                    self.user = User(
                         id: data["id"] as? String ?? "",
                         name: data["name"] as? String ?? "",
                         email: data["email"] as? String ?? "",
@@ -53,11 +73,33 @@ class ProfileViewViewModel: ObservableObject {
                         aiMessageQuota: data["aiMessageQuota"] as? Int ?? 0
                     )
                     
-                    // Profil fotoğrafını yükle
-                    self?.fetchProfileImage()
-                    self?.isLoading = false
+                    // Profil fotoğrafını hemen yükle
+                    self.loadProfileImage(userId: userId)
                 }
             }
+    }
+    
+    private func handleError() {
+        DispatchQueue.main.async {
+            self.isLoading = false
+            self.user = nil
+            self.profileImage = nil
+        }
+    }
+    
+    private func loadProfileImage(userId: String) {
+        let profileImageRef = storage.child("profile_images/\(userId).jpg")
+        
+        profileImageRef.getData(maxSize: 5 * 1024 * 1024) { [weak self] data, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error downloading image: \(error.localizedDescription)")
+                } else if let data = data, let image = UIImage(data: data) {
+                    self?.profileImage = image
+                }
+                self?.isLoading = false
+            }
+        }
     }
     
     func uploadProfileImage(_ image: UIImage) {
@@ -68,7 +110,6 @@ class ProfileViewViewModel: ObservableObject {
         
         isImageUploading = true
         
-        // Resmi sıkıştır
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             print("Could not compress image")
             isImageUploading = false
@@ -76,12 +117,10 @@ class ProfileViewViewModel: ObservableObject {
         }
         
         let profileImageRef = storage.child("profile_images/\(userId).jpg")
-        
-        // Metadata ekle
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
         
-        profileImageRef.putData(imageData, metadata: metadata) { [weak self] metadata, error in
+        profileImageRef.putData(imageData, metadata: metadata) { [weak self] _, error in
             if let error = error {
                 print("Error uploading image: \(error.localizedDescription)")
                 DispatchQueue.main.async {
@@ -90,21 +129,14 @@ class ProfileViewViewModel: ObservableObject {
                 return
             }
             
-            // Yükleme başarılı, URL'yi al
-            profileImageRef.downloadURL { url, error in
+            profileImageRef.downloadURL { [weak self] url, error in
                 DispatchQueue.main.async {
                     if let error = error {
                         print("Error getting download URL: \(error.localizedDescription)")
-                        self?.isImageUploading = false
-                        return
-                    }
-                    
-                    // Firestore'da profil fotoğrafı URL'sini güncelle
-                    if let url = url {
+                    } else if let url = url {
                         self?.updateProfileImageURL(url.absoluteString)
                         self?.profileImage = image
                     }
-                    
                     self?.isImageUploading = false
                 }
             }
@@ -114,7 +146,6 @@ class ProfileViewViewModel: ObservableObject {
     private func updateProfileImageURL(_ urlString: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
-        let db = Firestore.firestore()
         db.collection("users").document(userId).updateData([
             "profileImageURL": urlString
         ]) { error in
@@ -124,33 +155,18 @@ class ProfileViewViewModel: ObservableObject {
         }
     }
     
-    private func fetchProfileImage() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("No user ID found for fetching image")
-            return
-        }
-        
-        let profileImageRef = storage.child("profile_images/\(userId).jpg")
-        
-        profileImageRef.getData(maxSize: 5 * 1024 * 1024) { [weak self] data, error in
-            if let error = error {
-                print("Error downloading image: \(error.localizedDescription)")
-                return
-            }
-            
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    self?.profileImage = image
-                }
-            }
-        }
-    }
-    
     func logOut() {
         do {
             try Auth.auth().signOut()
         } catch {
-            print(error)
+            print("Error signing out: \(error.localizedDescription)")
+        }
+    }
+    
+    deinit {
+        if let listener = authStateListener {
+            Auth.auth().removeStateDidChangeListener(listener)
         }
     }
 }
+

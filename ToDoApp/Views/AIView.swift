@@ -26,12 +26,9 @@ struct AIView: View {
     var body: some View {
         NavigationView {
             ZStack {
+                // Arka plan gradyanı
                 LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.1, green: 0.2, blue: 0.45),
-                        Color(red: 0.3, green: 0.2, blue: 0.5),
-                        Color(red: 0.2, green: 0.3, blue: 0.6)
-                    ]),
+                    gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -54,8 +51,7 @@ struct AIView: View {
             .navigationTitle("Ne öğreneceksiniz?")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(Color(red: 0.1, green: 0.2, blue: 0.45), for: .navigationBar)
+            
             .contentShape(Rectangle())
             .onTapGesture {
                 focusedField = nil

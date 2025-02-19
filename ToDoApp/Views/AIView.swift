@@ -25,21 +25,37 @@ struct AIView: View {
     // MARK: - Body
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Quota indicator
-                HStack {
-                    Spacer()
-                    Text("Kalan AI Mesaj Hakkı: \(viewModel.aiMessageQuota)")
-                        .foregroundColor(.gray)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                }
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.1, green: 0.2, blue: 0.45),
+                        Color(red: 0.3, green: 0.2, blue: 0.5),
+                        Color(red: 0.2, green: 0.3, blue: 0.6)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                chatMessagesView
-                messageInputView
+                VStack(spacing: 0) {
+                    // Quota indicator
+                    HStack {
+                        Spacer()
+                        Text("Kalan AI Mesaj Hakkı: \(viewModel.aiMessageQuota)")
+                            .foregroundColor(.white)
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+                    }
+                    
+                    chatMessagesView
+                    messageInputView
+                }
             }
             .navigationTitle("Ne öğreneceksiniz?")
-            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color(red: 0.1, green: 0.2, blue: 0.45), for: .navigationBar)
             .contentShape(Rectangle())
             .onTapGesture {
                 focusedField = nil
@@ -71,33 +87,37 @@ struct AIView: View {
             }
             .padding()
         }
+        .background(Color.clear)
     }
     
     private var messageInputView: some View {
         VStack(spacing: 0) {
             Divider()
+                .background(Color.white)
             HStack(spacing: 12) {
                 TextField("Java dili öğrenmek istiyorum", text: $viewModel.inputText, axis: .vertical)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                    .background(Color.gray.opacity(0.1))
+                    .background(Color.white.opacity(0.15))
                     .cornerRadius(20)
                     .focused($focusedField, equals: .textField)
+                    .foregroundColor(.white)
+                    .tint(.white)
                 
                 Button {
                     viewModel.sendMessage()
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 32))
-                        .foregroundColor(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .blue)
+                        .foregroundColor(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .white)
                 }
                 .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
         }
-        .background(Color(uiColor: .systemBackground))
+        .background(Color.black.opacity(0.2))
     }
 }
 

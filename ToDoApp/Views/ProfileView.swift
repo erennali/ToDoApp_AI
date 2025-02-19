@@ -6,9 +6,14 @@
 //
 
 import SwiftUI
+import PhotosUI
+import FirebaseStorage
 
 struct ProfileView: View {
     @StateObject var viewModel = ProfileViewViewModel()
+    @State private var showImagePicker = false
+    @State private var selectedImage: PhotosPickerItem?
+    @State private var profileImage: Image?
     
     init() {}
     
@@ -107,21 +112,55 @@ struct ProfileView: View {
     private func profileHeader(user: User) -> some View {
         VStack(spacing: 15) {
             // Profil Resmi
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            gradient: Gradient(colors: [.blue.opacity(0.5), .purple.opacity(0.5)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 120, height: 120)
-                    .shadow(color: .purple.opacity(0.3), radius: 10)
-                
-                Text(String(user.name.prefix(1)).uppercased())
-                    .font(.system(size: 50, weight: .bold))
-                    .foregroundColor(.white)
+            PhotosPicker(selection: $selectedImage, matching: .images) {
+                ZStack {
+                    if viewModel.isImageUploading {
+                        ZStack {
+                            Circle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 120, height: 120)
+                            ProgressView()
+                                .scaleEffect(1.5)
+                        }
+                    } else if let profileImage = viewModel.profileImage {
+                        Image(uiImage: profileImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 120, height: 120)
+                            .clipShape(Circle())
+                            .shadow(color: .purple.opacity(0.3), radius: 10)
+                    } else {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.blue.opacity(0.5), .purple.opacity(0.5)]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 120, height: 120)
+                            .shadow(color: .purple.opacity(0.3), radius: 10)
+                        
+                        Text(String(user.name.prefix(1)).uppercased())
+                            .font(.system(size: 50, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    
+                    Circle()
+                        .stroke(Color.white, lineWidth: 2)
+                        .frame(width: 120, height: 120)
+                }
+            }
+            .onChange(of: selectedImage) { newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                        if let uiImage = UIImage(data: data) {
+                            await MainActor.run {
+                                viewModel.uploadProfileImage(uiImage)
+                            }
+                        }
+                    }
+                }
             }
             
             // Kullanıcı Adı

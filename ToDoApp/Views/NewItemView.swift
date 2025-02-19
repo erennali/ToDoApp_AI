@@ -68,7 +68,7 @@ struct NewItemView: View {
                             
                             // Alarm Toggle
                             HStack {
-                                Label("Alarm Kur", systemImage: "clock.badge")
+                                Label("Hatırlatıcı Kur", systemImage: "clock.badge")
                                     .foregroundColor(.gray)
                                 Spacer()
                                 Toggle("", isOn: $viewModel.onClock)

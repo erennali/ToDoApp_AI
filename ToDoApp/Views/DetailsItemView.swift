@@ -12,6 +12,10 @@ struct DetailsItemView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ToDoListItemViewViewModel()
     
+    private var isOverdue: Bool {
+        Date(timeIntervalSince1970: item.dueDate) < Date()
+    }
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -33,6 +37,18 @@ struct DetailsItemView: View {
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
                             
+                            if isOverdue {
+                                HStack(spacing: 15) {
+                                    Image (systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.red)
+                                    Text("Süresi Geçmiş!")
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.red.opacity(0.15))
+                                .cornerRadius(20)
+                            }
+                            
                             // Status Badges
                             HStack(spacing: 15) {
                                 // Completion Status
@@ -42,6 +58,7 @@ struct DetailsItemView: View {
                                     Text(item.isDone ? "Tamamlandı" : "Devam Ediyor")
                                         .font(.subheadline)
                                         .foregroundColor(item.isDone ? .green : .orange)
+                                    
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)

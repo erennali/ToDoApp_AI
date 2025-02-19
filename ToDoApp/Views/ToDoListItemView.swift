@@ -11,6 +11,10 @@ struct ToDoListItemView: View {
     @StateObject var viewModel = ToDoListItemViewViewModel()
     let item: ToDoListItem
     
+    private var isOverdue: Bool {
+        Date(timeIntervalSince1970: item.dueDate) < Date()
+    }
+    
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "tr_TR")
@@ -56,8 +60,16 @@ struct ToDoListItemView: View {
             if item.onClock {
                 Image(systemName: "bell.fill")
                     .font(.system(size: 14))
-                    .foregroundColor(.orange)
+                    .foregroundColor(item.isDone ? .gray : .orange)
             }
+            
+            if isOverdue && item.isDone == false{
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(.red)
+            }
+            
+            
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)

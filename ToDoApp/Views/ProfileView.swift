@@ -39,7 +39,7 @@ struct ProfileView: View {
                                 // Kişisel Bilgiler Kartı
                                 profileCard {
                                     VStack(spacing: 15) {
-                                        infoRow(icon: "person.fill", title: "İsim", value: user.name)
+                                        infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
                                         Divider()
                                         infoRow(icon: "envelope.fill", title: "Email", value: user.email)
                                     }
@@ -59,12 +59,16 @@ struct ProfileView: View {
                                     infoRow(
                                         icon: "calendar.badge.clock",
                                         title: "Katılım Tarihi",
-                                        value: Date(timeIntervalSince1970: user.joined).formatted(
-                                            .dateTime.day().month().year()
+                                        value: Date(timeIntervalSince1970: user.joined)
+                                            .formatted(
+                                                .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
+                                            
                                         )
+                                        
                                     )
-                                    .environment(\.locale, Locale(identifier: "tr_TR"))
+                                    
                                 }
+                                
                                 
                                 // Çıkış Yap Butonu
                                 Button(action: { viewModel.logOut() }) {

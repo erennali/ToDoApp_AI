@@ -9,10 +9,32 @@ import SwiftUI
 import FirebaseCore
 import FirebaseAuth
 import UserNotifications
+import OneSignalFramework
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+       // Remove this method to stop OneSignal Debugging
+       OneSignal.Debug.setLogLevel(.LL_VERBOSE)
+        
+       // OneSignal initialization
+       if let oneSignalAppId = EnvironmentManager.oneSignalAppId {
+           OneSignal.initialize(oneSignalAppId, withLaunchOptions: launchOptions)
+           
+           // requestPermission will show the native iOS notification permission prompt.
+           OneSignal.Notifications.requestPermission({ accepted in
+               print("User accepted notifications: \(accepted)")
+           }, fallbackToSettings: true)
+       } else {
+           print("⚠️ OneSignal App ID not found in environment")
+       }
+
+       return true
+    }
+}
 
 @main
 struct ToDoAppApp: App {
-    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State var showPreviewPage = true
     @StateObject var viewModel = MainViewViewModel()
     

@@ -3,6 +3,7 @@ import Foundation
 enum EnvironmentManager {
     enum Keys {
         static let apiKey = "API_KEY"
+        static let oneSignalAppId = "ONESIGNAL_APP_ID"
     }
     
     static func getValue(_ key: String) -> String? {
@@ -52,5 +53,9 @@ enum EnvironmentManager {
     
     static var apiKey: String? {
         return getValue(Keys.apiKey)
+    }
+    
+    static var oneSignalAppId: String? {
+        return getValue(Keys.oneSignalAppId)
     }
 }

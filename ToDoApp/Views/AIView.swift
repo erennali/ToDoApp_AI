@@ -88,8 +88,7 @@ struct AIView: View {
     
     private var messageInputView: some View {
         VStack(spacing: 0) {
-            Divider()
-                .background(Color.white)
+            
             HStack(spacing: 12) {
                 TextField("Java dili öğrenmek istiyorum", text: $viewModel.inputText, axis: .vertical)
                     .textFieldStyle(PlainTextFieldStyle())

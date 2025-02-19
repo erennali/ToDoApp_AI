@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseAuth
+import UserNotifications
 
 @main
 struct ToDoAppApp: App {
@@ -17,6 +18,8 @@ struct ToDoAppApp: App {
     
     init() {
         FirebaseApp.configure()
+        // Request notification permissions
+        NotificationManager.shared.requestAuthorization()
     }
     
     var body: some Scene {

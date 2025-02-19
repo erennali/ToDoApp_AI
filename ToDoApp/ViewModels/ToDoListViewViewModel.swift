@@ -21,6 +21,8 @@ class ToDoListViewViewModel: ObservableObject {
         
         // Start checking for expired tasks
         startExpirationCheck()
+        // Schedule daily notification
+        scheduleDailyNotification()
     }
     
     deinit {
@@ -67,6 +69,37 @@ class ToDoListViewViewModel: ObservableObject {
                         self?.delete(id: document.documentID)
                     }
                 }
+            }
+    }
+    
+    private func scheduleDailyNotification() {
+        // Get today's tasks and schedule notification
+        db.collection("users")
+            .document(userId)
+            .collection("todos")
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let documents = snapshot?.documents, error == nil else {
+                    print("Error fetching tasks for notification: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+                
+                let calendar = Calendar.current
+                let now = Date()
+                let todayStart = calendar.startOfDay(for: now)
+                let todayEnd = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+                
+                let todayTasks = documents.filter { document in
+                    if let dueDate = document.data()["dueDate"] as? TimeInterval,
+                       let isDone = document.data()["isDone"] as? Bool,
+                       !isDone {
+                        let taskDate = Date(timeIntervalSince1970: dueDate)
+                        return calendar.isDate(taskDate, inSameDayAs: now)
+                    }
+                    return false
+                }
+                
+                // Update notification with today's task count
+                NotificationManager.shared.updateNotificationWithTaskCount(todayTasks.count)
             }
     }
 }

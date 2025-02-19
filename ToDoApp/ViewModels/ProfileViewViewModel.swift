@@ -157,6 +157,10 @@ class ProfileViewViewModel: ObservableObject {
     
     func logOut() {
         do {
+            // Clear local user data first
+            clearUserData()
+            
+            // Sign out from Firebase Auth
             try Auth.auth().signOut()
         } catch {
             print("Error signing out: \(error.localizedDescription)")

@@ -20,7 +20,7 @@ struct HeaderView: View {
             
             // İçerik
             VStack(spacing: 20) {
-                Image("eren-logo")
+                Image("brain_2")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 120, height: 120)
@@ -36,7 +36,7 @@ struct HeaderView: View {
                     .padding(.top, 20)
                 
                 VStack(spacing: 5) {
-                    Text("To Do App")
+                    Text("Görev Yönetimi : AI")
                         .font(.system(size: 35, weight: .bold, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(

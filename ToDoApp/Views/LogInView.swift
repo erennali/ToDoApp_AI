@@ -54,6 +54,15 @@ struct LogInView: View {
                                     action: viewModel.login,
                                     isLoading: viewModel.isLoading
                                 )
+                                
+                                // Password Reset Button
+                                Button(action: viewModel.resetPassword) {
+                                    Text("Şifremi Unuttum")
+                                        .foregroundColor(.blue)
+                                        .font(.system(size: 14, weight: .medium))
+                                }
+                                .disabled(viewModel.isLoading)
+                                .padding(.top, -5)
                             }
                         }
                         

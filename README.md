@@ -6,8 +6,9 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
 
 - **Kullanıcı Yönetimi**
   - Kullanıcı kaydı ve girişi
-  - Profil yönetimi
+  - Profil yönetimi ve fotoğraf yükleme
   - Firebase Authentication entegrasyonu
+  - Kullanıcı verilerinin Firestore'da güvenli saklanması
 
 - **Görev Yönetimi**
   - Görev oluşturma ve düzenleme
@@ -15,11 +16,17 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
   - Görev bitiş tarihi belirleme
   - Görevleri tamamlandı olarak işaretleme
   - Görev silme
+  - Görev hatırlatma bildirimleri
+    - Görev bitiş saatinden 30 dakika önce otomatik hatırlatma
+    - Her sabah 8:30'da günlük görev özeti bildirimi
+    - OneSignal entegrasyonu ile güvenilir bildirim yönetimi
 
 - **AI Asistan**
-  - OpenAI entegrasyonu
-  - Görevleriniz hakkında AI destekli öneriler
-  - Akıllı görev planlaması
+  - OpenAI GPT-3.5 Turbo entegrasyonu
+  - Görev planlaması için AI destekli öneriler
+  - 5 adımlı öğrenme planı oluşturma
+  - Önerilen görevleri direkt ToDo listesine ekleme
+  - Kullanıcı başına kotayla sınırlandırılmış AI kullanımı (10 mesaj)
   - Doğal dil işleme desteği
 
 - **Kullanıcı Arayüzü**
@@ -27,6 +34,8 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
   - Karanlık/Aydınlık mod desteği
   - Özelleştirilmiş animasyonlar
   - Sezgisel kullanıcı deneyimi
+  - Hoş geldin ekranı
+  - Tab-based navigation
 
 ## Teknik Özellikler 🛠
 
@@ -36,6 +45,9 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
 - Güvenli kullanıcı kimlik doğrulama
 - Environment variables ile güvenli API yönetimi
 - Async/await ile asenkron işlem yönetimi
+- OneSignal push notification sistemi
+- Firebase Storage ile profil fotoğrafı yönetimi
+- OpenAI API entegrasyonu ve kota yönetimi
 
 ## Gereksinimler 📋
 
@@ -44,6 +56,7 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
 - Swift 5.5 veya üzeri
 - Firebase hesabı
 - OpenAI API anahtarı
+- OneSignal hesabı
 
 ## Kurulum 🚀
 
@@ -52,16 +65,23 @@ Modern ve AI destekli bir iOS görev yönetim uygulaması.
 git clone https://github.com/erennali/ToDoApp_AI.git
 ```
 
-2. `.env` dosyasını oluşturun ve API anahtarınızı ekleyin:
+2. `.env` dosyasını oluşturun ve API anahtarlarını ekleyin:
 ```
-API_KEY=your_api_key_here
+API_KEY=your_openai_api_key_here
+ONESIGNAL_APP_ID=your_onesignal_app_id_here
+ONESIGNAL_REST_API_KEY=your_onesignal_api_key_here
 ```
 
 3. Firebase yapılandırmasını tamamlayın:
    - GoogleService-Info.plist dosyasını projeye ekleyin
    - Firebase konsolunda gerekli ayarları yapın
 
-4. Xcode ile projeyi açın ve çalıştırın
+4. OneSignal yapılandırmasını tamamlayın:
+   - OneSignal iOS uygulamanızı oluşturun
+   - Push notification sertifikalarını yapılandırın
+   - Notification Service Extension'ı projenize ekleyin
+
+5. Xcode ile projeyi açın ve çalıştırın
 
 ## Katkıda Bulunma 🤝
 

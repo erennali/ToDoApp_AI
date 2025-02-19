@@ -170,4 +170,44 @@ class LogInViewViewModel: ObservableObject {
             }
         }
     }
+    
+    func resetPassword() {
+        guard !email.trimmingCharacters(in: .whitespaces).isEmpty else {
+            errorMessage = "Lütfen e-posta adresinizi girin!"
+            showAlert = true
+            alertTitle = "Hata"
+            alertMessage = errorMessage
+            return
+        }
+        
+        // Email formatı kontrolü
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+        if !emailPred.evaluate(with: email) {
+            errorMessage = "Geçerli bir e-posta adresi giriniz!"
+            showAlert = true
+            alertTitle = "Hata"
+            alertMessage = errorMessage
+            return
+        }
+        
+        isLoading = true
+        Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let error = error {
+                    self?.errorMessage = "Şifre sıfırlama e-postası gönderilirken bir hata oluştu: \(error.localizedDescription)"
+                    self?.showAlert = true
+                    self?.alertTitle = "Hata"
+                    self?.alertMessage = self?.errorMessage ?? ""
+                } else {
+                    self?.errorMessage = "Şifre sıfırlama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin."
+                    self?.showAlert = true
+                    self?.alertTitle = "Başarılı"
+                    self?.alertMessage = self?.errorMessage ?? ""
+                }
+            }
+        }
+    }
 }

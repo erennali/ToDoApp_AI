@@ -176,8 +176,6 @@
 				BAAAC24D2D537608001E2F51 /* FirebaseStorage */,
 				BA1B71BD2D65DCC000595879 /* OneSignalFramework */,
 				BA1B71BF2D65DCC000595879 /* OneSignalInAppMessages */,
-				BA31B0F62D660E3F003D9F28 /* Alamofire */,
-				BA31B0F82D660E3F003D9F28 /* AlamofireDynamic */,
 			);
 			productName = ToDoApp;
 			productReference = BAAAC2352D5375B1001E2F51 /* ToDoApp.app */;
@@ -213,7 +211,7 @@
 			packageReferences = (
 				BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				BA1B71BA2D65DCC000595879 /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */,
-				BA31B0F52D660E3F003D9F28 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BAAAC2362D5375B1001E2F51 /* Products */;
@@ -551,14 +549,6 @@
 				minimumVersion = 5.2.10;
 			};
 		};
-		BA31B0F52D660E3F003D9F28 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.10.2;
-			};
-		};
 		BAAAC2462D537608001E2F51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -584,16 +574,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BA1B71BA2D65DCC000595879 /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */;
 			productName = OneSignalInAppMessages;
-		};
-		BA31B0F62D660E3F003D9F28 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BA31B0F52D660E3F003D9F28 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
-		BA31B0F82D660E3F003D9F28 /* AlamofireDynamic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BA31B0F52D660E3F003D9F28 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = AlamofireDynamic;
 		};
 		BAAAC2472D537608001E2F51 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

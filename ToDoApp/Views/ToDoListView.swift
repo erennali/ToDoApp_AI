@@ -7,6 +7,7 @@ struct ToDoListView: View {
     @FirestoreQuery var items: [ToDoListItem]
     @State private var selectedItem: ToDoListItem?
     @State private var showingDetails = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   
     init(userId: String) {
         self._items = FirestoreQuery(collectionPath: "users/\(userId)/todos", predicates: [
@@ -27,24 +28,52 @@ struct ToDoListView: View {
                 .ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 20) {
-                        // Bugünün görevleri
-                        if let todayItems = getTodayItems(), !todayItems.isEmpty {
-                            taskSection(
-                                title: "Bugünün Görevleri",
-                                items: todayItems,
-                                icon: "sun.max.fill"
-                            )
-                        }
-                        
-                        // Gelecek görevler
-                        let futureItems = items.filter { !isTodayTask($0) }
-                        if !futureItems.isEmpty {
-                            taskSection(
-                                title: "Gelecek Görevler",
-                                items: futureItems,
-                                icon: "calendar"
-                            )
+                    LazyVStack(spacing: 20) {
+                        // iPad için grid layout
+                        if horizontalSizeClass == .regular {
+                            HStack(alignment: .top, spacing: 20) {
+                                // Bugünün görevleri
+                                if let todayItems = getTodayItems(), !todayItems.isEmpty {
+                                    taskSection(
+                                        title: "Bugünün Görevleri",
+                                        items: todayItems,
+                                        icon: "sun.max.fill"
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                }
+                                
+                                // Gelecek görevler
+                                let futureItems = items.filter { !isTodayTask($0) }
+                                if !futureItems.isEmpty {
+                                    taskSection(
+                                        title: "Gelecek Görevler",
+                                        items: futureItems,
+                                        icon: "calendar"
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                }
+                            }
+                            .padding(.horizontal)
+                        } else {
+                            // iPhone için normal layout
+                            // Bugünün görevleri
+                            if let todayItems = getTodayItems(), !todayItems.isEmpty {
+                                taskSection(
+                                    title: "Bugünün Görevleri",
+                                    items: todayItems,
+                                    icon: "sun.max.fill"
+                                )
+                            }
+                            
+                            // Gelecek görevler
+                            let futureItems = items.filter { !isTodayTask($0) }
+                            if !futureItems.isEmpty {
+                                taskSection(
+                                    title: "Gelecek Görevler",
+                                    items: futureItems,
+                                    icon: "calendar"
+                                )
+                            }
                         }
                     }
                     .padding(.vertical)
@@ -59,9 +88,9 @@ struct ToDoListView: View {
                     viewModel.showingNewItemView = true
                 } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: horizontalSizeClass == .regular ? 22 : 18, weight: .semibold))
                         .foregroundColor(.white)
-                        .padding(8)
+                        .padding(horizontalSizeClass == .regular ? 12 : 8)
                         .background(
                             LinearGradient(
                                 gradient: Gradient(colors: [.blue.opacity(0.8), .purple.opacity(0.8)]),
@@ -85,16 +114,16 @@ struct ToDoListView: View {
             // Section Header
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 24))
+                    .font(.system(size: horizontalSizeClass == .regular ? 28 : 24))
                     .foregroundColor(.blue)
                 Text(title)
-                    .font(.title3)
+                    .font(horizontalSizeClass == .regular ? .title2 : .title3)
                     .fontWeight(.semibold)
             }
             .padding(.horizontal)
             
             // Tasks
-            VStack(spacing: 12) {
+            LazyVStack(spacing: 12) {
                 ForEach(items) { item in
                     ToDoListItemView(item: item)
                         .background(Color(.systemBackground))

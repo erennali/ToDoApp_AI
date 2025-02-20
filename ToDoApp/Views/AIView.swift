@@ -11,6 +11,7 @@ struct AIView: View {
     // MARK: - Properties
     @StateObject private var viewModel: AIViewModel
     @FocusState private var focusedField: Field?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     // MARK: - Init
     init(viewModel: AIViewModel = AIViewModel()) {
@@ -39,9 +40,10 @@ struct AIView: View {
                     HStack {
                         Spacer()
                         Text("Kalan AI Mesaj Hakkı: \(viewModel.aiMessageQuota)")
+                            .font(.system(size: horizontalSizeClass == .regular ? 18 : 16))
                             .foregroundColor(.white)
                             .padding(.horizontal)
-                            .padding(.top, 8)
+                            .padding(.top, horizontalSizeClass == .regular ? 12 : 8)
                     }
                     
                     chatMessagesView
@@ -68,17 +70,19 @@ struct AIView: View {
                 Text("AI mesaj gönderme hakkınız kalmadı.")
             }
         }
+        .navigationViewStyle(horizontalSizeClass == .regular ? .stack : .stack)
     }
     
     // MARK: - Subviews
     private var chatMessagesView: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: horizontalSizeClass == .regular ? 16 : 12) {
                 ForEach(viewModel.messages) { message in
                     MessageBubbleView(
                         message: message,
                         viewModel: MessageBubbleViewModel(aiViewModel: viewModel)
                     )
+                    .padding(.horizontal, horizontalSizeClass == .regular ? 20 : 0)
                 }
             }
             .padding()
@@ -88,34 +92,39 @@ struct AIView: View {
     
     private var messageInputView: some View {
         VStack(spacing: 0) {
-            
-            HStack(spacing: 12) {
+            HStack(spacing: horizontalSizeClass == .regular ? 16 : 12) {
                 TextField("Java dili öğrenmek istiyorum", text: $viewModel.inputText, axis: .vertical)
                     .textFieldStyle(PlainTextFieldStyle())
                     .padding(.horizontal)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, horizontalSizeClass == .regular ? 12 : 8)
                     .background(Color.white.opacity(0.15))
                     .cornerRadius(20)
                     .focused($focusedField, equals: .textField)
                     .foregroundColor(.white)
                     .tint(.white)
+                    .font(.system(size: horizontalSizeClass == .regular ? 18 : 16))
                 
                 Button {
                     viewModel.sendMessage()
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 32))
+                        .font(.system(size: horizontalSizeClass == .regular ? 40 : 32))
                         .foregroundColor(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .white)
                 }
                 .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
             }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
+            .padding(.horizontal, horizontalSizeClass == .regular ? 24 : 16)
+            .padding(.vertical, horizontalSizeClass == .regular ? 12 : 8)
         }
         .background(Color.black.opacity(0.2))
     }
 }
 
 #Preview {
-    AIView()
+    Group {
+        AIView()
+            .environment(\.horizontalSizeClass, .compact)
+        AIView()
+            .environment(\.horizontalSizeClass, .regular)
+    }
 }

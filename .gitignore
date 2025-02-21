@@ -41,3 +41,29 @@ Package.resolved
 *.swp
 *.swo
 .env
+
+# StoreKit Configuration
+*.storekit
+Configuration.storekit
+
+# Firebase
+GoogleService-Info.plist
+
+# Other
+*.log
+
+# CocoaPods
+Pods/
+*.xcworkspace
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+injected_container.swift

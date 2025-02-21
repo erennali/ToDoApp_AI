@@ -1,0 +1,31 @@
+{
+  "identifier" : "EXAMPLE_IDENTIFIER",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "EXAMPLE_ID_1",
+      "localizations" : [
+        {
+          "description" : "10 AI mesaj kredisi",
+          "displayName" : "10 Kredi Paketi",
+          "locale" : "tr"
+        }
+      ],
+      "productID" : "com.yourcompany.app.credits.10",
+      "referenceName" : "10 Credits",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "com.yourcompany.app",
+    "_developerTeamID" : "YOUR_TEAM_ID",
+    "_lastSynchronizedDate" : 711234567.89012301
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+} 

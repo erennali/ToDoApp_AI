@@ -11,6 +11,7 @@
 		BA1B71BC2D65DCC000595879 /* OneSignalExtension in Frameworks */ = {isa = PBXBuildFile; productRef = BA1B71BB2D65DCC000595879 /* OneSignalExtension */; };
 		BA1B71BE2D65DCC000595879 /* OneSignalFramework in Frameworks */ = {isa = PBXBuildFile; productRef = BA1B71BD2D65DCC000595879 /* OneSignalFramework */; };
 		BA1B71C02D65DCC000595879 /* OneSignalInAppMessages in Frameworks */ = {isa = PBXBuildFile; productRef = BA1B71BF2D65DCC000595879 /* OneSignalInAppMessages */; };
+		BA490ADE2D68807200D90346 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA490ADD2D68807200D90346 /* StoreKit.framework */; };
 		BAAAC2482D537608001E2F51 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC2472D537608001E2F51 /* FirebaseAuth */; };
 		BAAAC24A2D537608001E2F51 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC2492D537608001E2F51 /* FirebaseCore */; };
 		BAAAC24C2D537608001E2F51 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BAAAC24B2D537608001E2F51 /* FirebaseFirestore */; };
@@ -43,6 +44,7 @@
 
 /* Begin PBXFileReference section */
 		BA1B71A92D65D99200595879 /* OneSignalNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OneSignalNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA490ADD2D68807200D90346 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		BAAAC2352D5375B1001E2F51 /* ToDoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -96,6 +98,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BA1B71C02D65DCC000595879 /* OneSignalInAppMessages in Frameworks */,
+				BA490ADE2D68807200D90346 /* StoreKit.framework in Frameworks */,
 				BAAAC24A2D537608001E2F51 /* FirebaseCore in Frameworks */,
 				BAAAC24E2D537608001E2F51 /* FirebaseStorage in Frameworks */,
 				BAAAC2482D537608001E2F51 /* FirebaseAuth in Frameworks */,
@@ -107,12 +110,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BA490ADC2D68807200D90346 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BA490ADD2D68807200D90346 /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		BAAAC22C2D5375B1001E2F51 = {
 			isa = PBXGroup;
 			children = (
 				BA1B71AA2D65D99200595879 /* OneSignalNotificationServiceExtension */,
 				BAAAC2362D5375B1001E2F51 /* Products */,
 				BAAAC27F2D53786F001E2F51 /* ToDoApp */,
+				BA490ADC2D68807200D90346 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};

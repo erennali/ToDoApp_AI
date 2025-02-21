@@ -12,6 +12,7 @@ import FirebaseAuth
 
 struct ProfileView: View {
     @StateObject var viewModel = ProfileViewViewModel()
+    @StateObject private var storeManager = StoreManager.shared
     @State private var showImagePicker = false
     @State private var selectedImage: PhotosPickerItem?
     @State private var profileImage: Image?
@@ -109,11 +110,11 @@ struct ProfileView: View {
                                                     infoRow(
                                                         icon: "calendar.badge.clock",
                                                         title: "Katılım Tarihi",
-                                                        value: Date(timeIntervalSince1970: user.joined)
-                                                            .formatted(
-                                                                .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
-                                                            )
+                                                        value: "\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))"
                                                     )
+                                                    
+                                                    // Kredi Satın Alma Bölümü
+                                                    creditPurchaseSection()
                                                 }
                                             }
                                         }
@@ -144,13 +145,14 @@ struct ProfileView: View {
                                                 infoRow(
                                                     icon: "calendar.badge.clock",
                                                     title: "Katılım Tarihi",
-                                                    value: Date(timeIntervalSince1970: user.joined)
-                                                        .formatted(
-                                                            .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
-                                                        )
+                                                    value: "\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))"
                                                 )
                                             }
+                                            
+                                            // Kredi Satın Alma Bölümü
+                                            creditPurchaseSection()
                                         }
+                                        .padding(.top)
                                         .padding(.horizontal)
                                     }
                                     
@@ -299,6 +301,48 @@ struct ProfileView: View {
             
             Spacer()
         }
+    }
+    
+    // Kredi Satın Alma Bölümü
+    private func creditPurchaseSection() -> some View {
+        VStack(spacing: 15) {
+            Text("Kredi Satın Al")
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            if storeManager.products.isEmpty {
+                Text("Ürünler yükleniyor...")
+                    .foregroundColor(.gray)
+            } else {
+                ForEach(storeManager.products) { product in
+                    Button(action: {
+                        Task {
+                            await storeManager.purchase(product)
+                        }
+                    }) {
+                        HStack {
+                            Text(product.displayName)
+                                .font(.subheadline)
+                                .bold()
+                            Spacer()
+                            Text(product.displayPrice)
+                                .font(.subheadline)
+                        }
+                        .padding()
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(10)
+                    }
+                }
+            }
+            
+            if let error = storeManager.errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(.top)
     }
     
     private func checkDemoStatus() {

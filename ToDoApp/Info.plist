@@ -7,6 +7,12 @@
 		<string>remote-notification</string>
 	</array>
 	
+	<key>StoreKit</key>
+	<dict>
+		<key>Configuration</key>
+		<string>Configuration</string>
+	</dict>
+	
 	<key>UISupportedInterfaceOrientations~iphone</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

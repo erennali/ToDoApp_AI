@@ -76,22 +76,28 @@ class MainViewViewModel : ObservableObject {
                             self?.isSignedIn = false
                             try? Auth.auth().signOut()
                         } else {
-                            // E-posta doğrulaması kontrolü
-                            if !user.isEmailVerified {
-                                // E-posta doğrulanmamış, çıkış yap
-                                try? Auth.auth().signOut()
-                                self?.currentUserId = ""
-                                self?.isSignedIn = false
-                                // Yeni doğrulama e-postası gönder
-                                user.sendEmailVerification { error in
-                                    if let error = error {
-                                        print("Error sending verification email: \(error.localizedDescription)")
-                                    }
-                                }
-                            } else {
-                                // Kullanıcı hala geçerli ve e-posta doğrulanmış
+                            // Anonim (demo) kullanıcı kontrolü
+                            if user.isAnonymous {
                                 self?.currentUserId = user.uid
                                 self?.isSignedIn = true
+                            } else {
+                                // Normal kullanıcılar için e-posta doğrulaması kontrolü
+                                if !user.isEmailVerified {
+                                    // E-posta doğrulanmamış, çıkış yap
+                                    try? Auth.auth().signOut()
+                                    self?.currentUserId = ""
+                                    self?.isSignedIn = false
+                                    // Yeni doğrulama e-postası gönder
+                                    user.sendEmailVerification { error in
+                                        if let error = error {
+                                            print("Error sending verification email: \(error.localizedDescription)")
+                                        }
+                                    }
+                                } else {
+                                    // Kullanıcı hala geçerli ve e-posta doğrulanmış
+                                    self?.currentUserId = user.uid
+                                    self?.isSignedIn = true
+                                }
                             }
                         }
                     }

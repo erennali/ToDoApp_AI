@@ -6,6 +6,7 @@
 //
 
 import FirebaseAuth
+import FirebaseFirestore
 import Foundation
 
 class LogInViewViewModel: ObservableObject {
@@ -206,6 +207,47 @@ class LogInViewViewModel: ObservableObject {
                     self?.showAlert = true
                     self?.alertTitle = "Başarılı"
                     self?.alertMessage = self?.errorMessage ?? ""
+                }
+            }
+        }
+    }
+    
+    func demoLogin() {
+        isLoading = true
+        
+        // Demo kullanıcı bilgileri
+        let demoEmail = "demo@todoapp.com"
+        let demoPassword = "demo123"
+        
+        Auth.auth().signInAnonymously { [weak self] result, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let error = error {
+                    self?.errorMessage = "Demo giriş yapılırken bir hata oluştu: \(error.localizedDescription)"
+                    self?.showAlert = true
+                    self?.alertTitle = "Hata"
+                    self?.alertMessage = self?.errorMessage ?? ""
+                    return
+                }
+                
+                // Demo kullanıcı bilgilerini Firestore'a kaydet
+                if let userId = result?.user.uid {
+                    let db = Firestore.firestore()
+                    let userDocument = db.collection("users").document(userId)
+                    
+                    let userData: [String: Any] = [
+                        "name": "Demo Kullanıcı",
+                        "email": demoEmail,
+                        "joined": Date().timeIntervalSince1970,
+                        "isDemo": true
+                    ]
+                    
+                    userDocument.setData(userData) { error in
+                        if let error = error {
+                            print("Demo kullanıcı bilgileri kaydedilirken hata: \(error)")
+                        }
+                    }
                 }
             }
         }

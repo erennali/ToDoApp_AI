@@ -8,142 +8,200 @@
 import SwiftUI
 import PhotosUI
 import FirebaseStorage
+import FirebaseAuth
 
 struct ProfileView: View {
-    @StateObject var viewModel = ProfileViewViewModel.shared
+    @StateObject var viewModel = ProfileViewViewModel()
     @State private var showImagePicker = false
     @State private var selectedImage: PhotosPickerItem?
     @State private var profileImage: Image?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showingDemoAlert = false
+    @State private var isDemo = false
+    @State private var showingRegisterView = false
+    @State private var showingLoginView = false
     
     init() {}
     
     var body: some View {
         NavigationView {
-            ZStack {
-                // Arka plan gradyanı
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
-                if let user = viewModel.user {
-                    ScrollView {
-                        VStack(spacing: horizontalSizeClass == .regular ? 35 : 25) {
-                            // Profil Başlığı
-                            profileHeader(user: user)
-                            
-                            // iPad için grid layout
-                            if horizontalSizeClass == .regular {
-                                LazyVGrid(columns: [
-                                    GridItem(.flexible()),
-                                    GridItem(.flexible())
-                                ], spacing: 20) {
-                                    // Kişisel Bilgiler Kartı
-                                    profileCard {
-                                        VStack(spacing: 20) {
-                                            infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
-                                            Divider()
-                                            infoRow(icon: "envelope.fill", title: "Email", value: user.email)
-                                        }
-                                    }
-                                    
-                                    // AI Mesaj Kotası ve Katılım Bilgisi
-                                    profileCard {
-                                        VStack(spacing: 20) {
-                                            infoRow(
-                                                icon: "brain.head.profile",
-                                                title: "AI Mesaj Hakkı",
-                                                value: "\(user.aiMessageQuota) mesaj"
-                                            )
-                                            Divider()
-                                            infoRow(
-                                                icon: "calendar.badge.clock",
-                                                title: "Katılım Tarihi",
-                                                value: Date(timeIntervalSince1970: user.joined)
-                                                    .formatted(
-                                                        .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
-                                                    )
-                                            )
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal)
-                            } else {
-                                // iPhone için normal layout
-                                VStack(spacing: 15) {
-                                    // Kişisel Bilgiler Kartı
-                                    profileCard {
-                                        VStack(spacing: 15) {
-                                            infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
-                                            Divider()
-                                            infoRow(icon: "envelope.fill", title: "Email", value: user.email)
-                                        }
-                                    }
-                                    
-                                    // AI Mesaj Kotası Kartı
-                                    profileCard {
-                                        infoRow(
-                                            icon: "brain.head.profile",
-                                            title: "AI Mesaj Hakkı",
-                                            value: "\(user.aiMessageQuota) mesaj"
-                                        )
-                                    }
-                                    
-                                    // Katılım Bilgisi Kartı
-                                    profileCard {
-                                        infoRow(
-                                            icon: "calendar.badge.clock",
-                                            title: "Katılım Tarihi",
-                                            value: Date(timeIntervalSince1970: user.joined)
-                                                .formatted(
-                                                    .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
-                                                )
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal)
+            VStack {
+                if isDemo {
+                    // Demo kullanıcı mesajı
+                    VStack(spacing: 20) {
+                        Image(systemName: "person.fill.questionmark")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
+                        
+                        Text("Demo Hesap")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Text("Profil özelliklerini kullanmak için lütfen bir hesap oluşturun veya giriş yapın.")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                        
+                        Button(action: {
+                            try? Auth.auth().signOut()
+                            Auth.clearDemoUserData()
+                        }) {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Text("Çıkış Yap")
                             }
-                            
-                            // Çıkış Yap Butonu
-                            Button(action: { viewModel.logOut() }) {
-                                HStack {
-                                    Image(systemName: "rectangle.portrait.and.arrow.right")
-                                        .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
-                                    Text("Çıkış Yap")
-                                        .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: horizontalSizeClass == .regular ? 300 : .infinity)
-                                .padding()
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
                                 )
-                                .clipShape(RoundedRectangle(cornerRadius: 15))
-                                .shadow(color: .red.opacity(0.3), radius: 5, x: 0, y: 3)
-                            }
-                            .padding(.top, 10)
-                            .padding(.horizontal, horizontalSizeClass == .regular ? 0 : 16)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
                         }
-                        .padding(.top, horizontalSizeClass == .regular ? 30 : 20)
+                        .padding(.horizontal)
                     }
-                } else if viewModel.isLoading {
-                    ProgressView("Yükleniyor...")
-                        .scaleEffect(1.5)
-                        .tint(.blue)
                 } else {
-                    Text("Kullanıcı bilgileri yüklenemedi")
-                        .foregroundColor(.gray)
+                    // Normal kullanıcı profil görünümü
+                    ZStack {
+                        // Arka plan gradyanı
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .ignoresSafeArea()
+                        
+                        if let user = viewModel.user {
+                            ScrollView {
+                                VStack(spacing: horizontalSizeClass == .regular ? 35 : 25) {
+                                    // Profil Başlığı
+                                    profileHeader(user: user)
+                                    
+                                    // iPad için grid layout
+                                    if horizontalSizeClass == .regular {
+                                        LazyVGrid(columns: [
+                                            GridItem(.flexible()),
+                                            GridItem(.flexible())
+                                        ], spacing: 20) {
+                                            // Kişisel Bilgiler Kartı
+                                            profileCard {
+                                                VStack(spacing: 20) {
+                                                    infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
+                                                    Divider()
+                                                    infoRow(icon: "envelope.fill", title: "Email", value: user.email)
+                                                }
+                                            }
+                                            
+                                            // AI Mesaj Kotası ve Katılım Bilgisi
+                                            profileCard {
+                                                VStack(spacing: 20) {
+                                                    infoRow(
+                                                        icon: "brain.head.profile",
+                                                        title: "AI Mesaj Hakkı",
+                                                        value: "\(user.aiMessageQuota) mesaj"
+                                                    )
+                                                    Divider()
+                                                    infoRow(
+                                                        icon: "calendar.badge.clock",
+                                                        title: "Katılım Tarihi",
+                                                        value: Date(timeIntervalSince1970: user.joined)
+                                                            .formatted(
+                                                                .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
+                                                            )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    } else {
+                                        // iPhone için normal layout
+                                        VStack(spacing: 15) {
+                                            // Kişisel Bilgiler Kartı
+                                            profileCard {
+                                                VStack(spacing: 15) {
+                                                    infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
+                                                    Divider()
+                                                    infoRow(icon: "envelope.fill", title: "Email", value: user.email)
+                                                }
+                                            }
+                                            
+                                            // AI Mesaj Kotası Kartı
+                                            profileCard {
+                                                infoRow(
+                                                    icon: "brain.head.profile",
+                                                    title: "AI Mesaj Hakkı",
+                                                    value: "\(user.aiMessageQuota) mesaj"
+                                                )
+                                            }
+                                            
+                                            // Katılım Bilgisi Kartı
+                                            profileCard {
+                                                infoRow(
+                                                    icon: "calendar.badge.clock",
+                                                    title: "Katılım Tarihi",
+                                                    value: Date(timeIntervalSince1970: user.joined)
+                                                        .formatted(
+                                                            .dateTime.day().month().year().locale(Locale(identifier: "tr_TR"))
+                                                        )
+                                                )
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                    
+                                    // Çıkış Yap Butonu
+                                    Button(action: { viewModel.logOut() }) {
+                                        HStack {
+                                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                                .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
+                                            Text("Çıkış Yap")
+                                                .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
+                                        }
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: horizontalSizeClass == .regular ? 300 : .infinity)
+                                        .padding()
+                                        .background(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                                        .shadow(color: .red.opacity(0.3), radius: 5, x: 0, y: 3)
+                                    }
+                                    .padding(.top, 10)
+                                    .padding(.horizontal, horizontalSizeClass == .regular ? 0 : 16)
+                                }
+                                .padding(.top, horizontalSizeClass == .regular ? 30 : 20)
+                            }
+                        } else if viewModel.isLoading {
+                            ProgressView("Yükleniyor...")
+                                .scaleEffect(1.5)
+                                .tint(.blue)
+                        } else {
+                            Text("Kullanıcı bilgileri yüklenemedi")
+                                .foregroundColor(.gray)
+                        }
+                    }
                 }
             }
             .navigationTitle("Profil")
             .navigationBarTitleDisplayMode(.large)
+            .sheet(isPresented: $showingRegisterView) {
+                RegisterView()
+            }
+            .sheet(isPresented: $showingLoginView) {
+                LogInView()
+            }
+            .onAppear {
+                checkDemoStatus()
+            }
         }
         .navigationViewStyle(horizontalSizeClass == .regular ? .stack : .stack)
     }
@@ -240,6 +298,14 @@ struct ProfileView: View {
             }
             
             Spacer()
+        }
+    }
+    
+    private func checkDemoStatus() {
+        Auth.isDemoUser { isDemoUser in
+            DispatchQueue.main.async {
+                isDemo = isDemoUser
+            }
         }
     }
 }

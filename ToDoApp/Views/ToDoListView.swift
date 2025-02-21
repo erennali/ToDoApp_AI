@@ -1,5 +1,6 @@
 import FirebaseFirestore
 import SwiftUI
+import FirebaseAuth
 
 struct ToDoListView: View {
     
@@ -7,6 +8,10 @@ struct ToDoListView: View {
     @FirestoreQuery var items: [ToDoListItem]
     @State private var selectedItem: ToDoListItem?
     @State private var showingDetails = false
+    @State private var showingDemoAlert = false
+    @State private var isDemo = false
+    @State private var showingRegisterView = false
+    @State private var showingLoginView = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   
     init(userId: String) {
@@ -27,11 +32,75 @@ struct ToDoListView: View {
                 )
                 .ignoresSafeArea()
                 
-                ScrollView {
-                    LazyVStack(spacing: 20) {
-                        // iPad için grid layout
-                        if horizontalSizeClass == .regular {
-                            HStack(alignment: .top, spacing: 20) {
+                if isDemo {
+                    // Demo kullanıcı mesajı
+                    VStack(spacing: 20) {
+                        Image(systemName: "person.fill.questionmark")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
+                        
+                        Text("Demo Hesap")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Text("Görevlerinizi yönetmek için lütfen bir hesap oluşturun veya giriş yapın.")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                        
+                        Button(action: {
+                            try? Auth.auth().signOut()
+                            Auth.clearDemoUserData()
+                        }) {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Text("Çıkış Yap")
+                            }
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                        }
+                        .padding(.horizontal)
+                    }
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 20) {
+                            // iPad için grid layout
+                            if horizontalSizeClass == .regular {
+                                HStack(alignment: .top, spacing: 20) {
+                                    // Bugünün görevleri
+                                    if let todayItems = getTodayItems(), !todayItems.isEmpty {
+                                        taskSection(
+                                            title: "Bugünün Görevleri",
+                                            items: todayItems,
+                                            icon: "sun.max.fill"
+                                        )
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                    
+                                    // Gelecek görevler
+                                    let futureItems = items.filter { !isTodayTask($0) }
+                                    if !futureItems.isEmpty {
+                                        taskSection(
+                                            title: "Gelecek Görevler",
+                                            items: futureItems,
+                                            icon: "calendar"
+                                        )
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            } else {
+                                // iPhone için normal layout
                                 // Bugünün görevleri
                                 if let todayItems = getTodayItems(), !todayItems.isEmpty {
                                     taskSection(
@@ -39,7 +108,6 @@ struct ToDoListView: View {
                                         items: todayItems,
                                         icon: "sun.max.fill"
                                     )
-                                    .frame(maxWidth: .infinity)
                                 }
                                 
                                 // Gelecek görevler
@@ -50,42 +118,21 @@ struct ToDoListView: View {
                                         items: futureItems,
                                         icon: "calendar"
                                     )
-                                    .frame(maxWidth: .infinity)
                                 }
                             }
-                            .padding(.horizontal)
-                        } else {
-                            // iPhone için normal layout
-                            // Bugünün görevleri
-                            if let todayItems = getTodayItems(), !todayItems.isEmpty {
-                                taskSection(
-                                    title: "Bugünün Görevleri",
-                                    items: todayItems,
-                                    icon: "sun.max.fill"
-                                )
-                            }
-                            
-                            // Gelecek görevler
-                            let futureItems = items.filter { !isTodayTask($0) }
-                            if !futureItems.isEmpty {
-                                taskSection(
-                                    title: "Gelecek Görevler",
-                                    items: futureItems,
-                                    icon: "calendar"
-                                )
-                            }
                         }
+                        .padding(.vertical)
                     }
-                    .padding(.vertical)
                 }
             }
             .navigationTitle("Görevler")
-            .sheet(item: $selectedItem) { item in
-                DetailsItemView(item: item)
-            }
             .toolbar {
                 Button {
-                    viewModel.showingNewItemView = true
+                    if isDemo {
+                        showingDemoAlert = true
+                    } else {
+                        viewModel.showingNewItemView = true
+                    }
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: horizontalSizeClass == .regular ? 22 : 18, weight: .semibold))
@@ -102,11 +149,41 @@ struct ToDoListView: View {
                         .shadow(color: .purple.opacity(0.3), radius: 3, x: 0, y: 2)
                 }
             }
+            .sheet(item: $selectedItem) { item in
+                DetailsItemView(item: item)
+            }
             .sheet(isPresented: $viewModel.showingNewItemView) {
                 NewItemView(newItemPresented: $viewModel.showingNewItemView, alinanMetin: "")
             }
+            .sheet(isPresented: $showingRegisterView) {
+                RegisterView()
+            }
+            .sheet(isPresented: $showingLoginView) {
+                LogInView()
+            }
+            .alert(isPresented: $showingDemoAlert) {
+                Auth.showDemoAlert(
+                    navigateToRegister: {
+                        showingRegisterView = true
+                    },
+                    navigateToLogin: {
+                        showingLoginView = true
+                    }
+                )
+            }
         }
         .environment(\.locale, Locale(identifier: "tr_TR"))
+        .onAppear {
+            checkDemoStatus()
+        }
+    }
+    
+    private func checkDemoStatus() {
+        Auth.isDemoUser { isDemoUser in
+            DispatchQueue.main.async {
+                isDemo = isDemoUser
+            }
+        }
     }
     
     private func taskSection(title: String, items: [ToDoListItem], icon: String) -> some View {

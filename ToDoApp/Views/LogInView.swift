@@ -63,6 +63,19 @@ struct LogInView: View {
                                 }
                                 .disabled(viewModel.isLoading)
                                 .padding(.top, -5)
+                                
+                                // Demo Login Button
+                                Button(action: {
+                                    viewModel.demoLogin()
+                                }) {
+                                    HStack {
+                                        Image(systemName: "person.fill.questionmark")
+                                        Text("Demo Hesabı ile Giriş")
+                                    }
+                                    .foregroundColor(.orange)
+                                    .font(.system(size: 14, weight: .medium))
+                                }
+                                .disabled(viewModel.isLoading)
                             }
                         }
                         

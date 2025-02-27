@@ -11,13 +11,13 @@ import FirebaseFirestore
 class ToDoListViewViewModel: ObservableObject {
     @Published var showingNewItemView = false
     
-    private let userId: String
-    private var db: Firestore
+    let userId: String
+    private let db = Firestore.firestore()
+    private let defaults = UserDefaults.standard
     private var timer: Timer?
     
     init(userId: String) {
         self.userId = userId
-        self.db = Firestore.firestore()
         
         // Start checking for expired tasks
         startExpirationCheck()
@@ -30,11 +30,71 @@ class ToDoListViewViewModel: ObservableObject {
     }
     
     func delete(id: String) {
-        db.collection("users")
-            .document(userId)
-            .collection("todos")
-            .document(id)
-            .delete()
+        if !userId.isEmpty {
+            // Firebase'den sil
+            db.collection("users")
+                .document(userId)
+                .collection("todos")
+                .document(id)
+                .delete()
+        } else {
+            // Local storage'dan sil
+            var items = getLocalItems()
+            items.removeAll { $0.id == id }
+            saveLocalItems(items)
+        }
+    }
+    
+    func toggleIsDone(item: ToDoListItem) {
+        var itemCopy = item
+        itemCopy.setDone(!item.isDone)
+        
+        if !userId.isEmpty {
+            // Firebase'de güncelle
+            db.collection("users")
+                .document(userId)
+                .collection("todos")
+                .document(item.id)
+                .setData(itemCopy.asDictionary())
+        } else {
+            // Local storage'da güncelle
+            var items = getLocalItems()
+            if let index = items.firstIndex(where: { $0.id == item.id }) {
+                items[index] = itemCopy
+                saveLocalItems(items)
+            }
+        }
+    }
+    
+    // Local storage işlemleri
+    private func getLocalItems() -> [ToDoListItem] {
+        if let data = defaults.data(forKey: "todos"),
+           let items = try? JSONDecoder().decode([ToDoListItem].self, from: data) {
+            return items
+        }
+        return []
+    }
+    
+    private func saveLocalItems(_ items: [ToDoListItem]) {
+        if let encoded = try? JSONEncoder().encode(items) {
+            defaults.set(encoded, forKey: "todos")
+        }
+    }
+    
+    func addItem(_ item: ToDoListItem) {
+        if !userId.isEmpty {
+            // Firebase'e ekle
+            db.collection("users")
+                .document(userId)
+                .collection("todos")
+                .document(item.id)
+                .setData(item.asDictionary())
+        } else {
+            // Local storage'a ekle
+            var items = getLocalItems()
+            items.append(item)
+            saveLocalItems(items)
+        }
     }
     
     private func startExpirationCheck() {

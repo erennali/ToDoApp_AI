@@ -179,6 +179,28 @@ struct ProfileView: View {
                                     }
                                     .padding(.top, 10)
                                     .padding(.horizontal, horizontalSizeClass == .regular ? 0 : 16)
+                                    
+                                    // Hesap Silme Butonu
+                                    Button(action: { 
+                                        showingDemoAlert = true 
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "trash.fill")
+                                            Text("Hesabı Sil")
+                                        }
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.red)
+                                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                                    }
+                                    .padding(.horizontal)
+                                    .alert(isPresented: $showingDemoAlert) {
+                                        Alert(title: Text("Hesabı Sil"), message: Text("Hesabınızı silmek istediğinize emin misiniz?"), primaryButton: .destructive(Text("Sil")) {
+                                            // Hesap silme işlemi
+                                            viewModel.deleteAccount()
+                                        }, secondaryButton: .cancel())
+                                    }
                                 }
                                 .padding(.top, horizontalSizeClass == .regular ? 30 : 20)
                             }

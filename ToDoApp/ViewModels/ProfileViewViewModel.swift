@@ -167,6 +167,30 @@ class ProfileViewViewModel: ObservableObject {
         }
     }
     
+    func deleteAccount() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("No user ID found")
+            return
+        }
+        // Firestore'dan kullanıcı verilerini sil
+        db.collection("users").document(userId).delete { error in
+            if let error = error {
+                print("Error deleting user data: \(error.localizedDescription)")
+                return
+            }
+            // Firebase Authentication'dan kullanıcıyı sil
+            Auth.auth().currentUser?.delete { error in
+                if let error = error {
+                    print("Error deleting user: \(error.localizedDescription)")
+                } else {
+                    print("User account deleted successfully.")
+                    // Kullanıcı verilerini temizle
+                    self.clearUserData()
+                }
+            }
+        }
+    }
+    
     deinit {
         if let listener = authStateListener {
             Auth.auth().removeStateDidChangeListener(listener)

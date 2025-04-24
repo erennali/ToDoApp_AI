@@ -2,24 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSNotificationUsageDescription</key>
+	<string>Size önemli güncellemeler ve hatırlatmalar gönderebilmek için bildirim iznine ihtiyacımız var.</string>
+	<key>NSNotificationsUsageDescription</key>
+	<string>Size önemli güncellemeler ve hatırlatmalar gönderebilmek için bildirim iznine ihtiyacımız var.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
-	
 	<key>StoreKit</key>
 	<dict>
 		<key>Configuration</key>
 		<string>Configuration</string>
 	</dict>
-	
 	<key>UISupportedInterfaceOrientations~iphone</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

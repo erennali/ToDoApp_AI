@@ -76,7 +76,10 @@ struct ToDoListView: View {
                         LazyVStack(spacing: 20) {
                             // iPad için grid layout
                             if horizontalSizeClass == .regular {
-                                HStack(alignment: .top, spacing: 20) {
+                                LazyVGrid(columns: [
+                                    GridItem(.flexible(), spacing: 20),
+                                    GridItem(.flexible(), spacing: 20)
+                                ], spacing: 20) {
                                     // Bugünün görevleri
                                     if let todayItems = getTodayItems(), !todayItems.isEmpty {
                                         taskSection(
@@ -84,7 +87,6 @@ struct ToDoListView: View {
                                             items: todayItems,
                                             icon: "sun.max.fill"
                                         )
-                                        .frame(maxWidth: .infinity)
                                     }
                                     
                                     // Gelecek görevler
@@ -95,7 +97,6 @@ struct ToDoListView: View {
                                             items: futureItems,
                                             icon: "calendar"
                                         )
-                                        .frame(maxWidth: .infinity)
                                     }
                                 }
                                 .padding(.horizontal)
@@ -187,7 +188,7 @@ struct ToDoListView: View {
     }
     
     private func taskSection(title: String, items: [ToDoListItem], icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: horizontalSizeClass == .regular ? 20 : 15) {
             // Section Header
             HStack {
                 Image(systemName: icon)
@@ -200,7 +201,7 @@ struct ToDoListView: View {
             .padding(.horizontal)
             
             // Tasks
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: horizontalSizeClass == .regular ? 15 : 12) {
                 ForEach(items) { item in
                     ToDoListItemView(item: item)
                         .background(Color(.systemBackground))
@@ -231,7 +232,7 @@ struct ToDoListView: View {
             }
             .padding(.horizontal)
         }
-        .padding(.vertical, 10)
+        .padding(.vertical, horizontalSizeClass == .regular ? 15 : 10)
     }
     
     // Bugün yapılması gereken görevleri al

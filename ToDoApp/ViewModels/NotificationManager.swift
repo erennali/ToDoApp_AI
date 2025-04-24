@@ -1,17 +1,23 @@
 import Foundation
+import UIKit
 import UserNotifications
 
-class NotificationManager {
+class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationManager()
     
-    private init() {
-        requestAuthorization()
+    private override init() {
+        super.init()
+        UNUserNotificationCenter.current().delegate = self
     }
     
     func requestAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if granted {
                 print("Notification permission granted")
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
             } else if let error = error {
                 print("Error requesting notification permission: \(error.localizedDescription)")
             }
@@ -64,5 +70,18 @@ class NotificationManager {
                 print("Error scheduling notification: \(error.localizedDescription)")
             }
         }
+    }
+    
+    // UNUserNotificationCenterDelegate methods
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                              willPresent notification: UNNotification,
+                              withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .badge])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                              didReceive response: UNNotificationResponse,
+                              withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
     }
 } 

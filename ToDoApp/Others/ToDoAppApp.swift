@@ -13,22 +13,30 @@ import OneSignalFramework
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-       // Remove this method to stop OneSignal Debugging
-       OneSignal.Debug.setLogLevel(.LL_VERBOSE)
+        // Remove this method to stop OneSignal Debugging
+        OneSignal.Debug.setLogLevel(.LL_VERBOSE)
         
-       // OneSignal initialization
-       if let oneSignalAppId = EnvironmentManager.oneSignalAppId {
-           OneSignal.initialize(oneSignalAppId, withLaunchOptions: launchOptions)
-           
-           // requestPermission will show the native iOS notification permission prompt.
-           OneSignal.Notifications.requestPermission({ accepted in
-               print("User accepted notifications: \(accepted)")
-           }, fallbackToSettings: true)
-       } else {
-           print("⚠️ OneSignal App ID not found in environment")
-       }
-
-       return true
+        // OneSignal initialization
+        if let oneSignalAppId = EnvironmentManager.oneSignalAppId {
+            OneSignal.initialize(oneSignalAppId, withLaunchOptions: launchOptions)
+            
+            // Request permission for notifications
+            OneSignal.Notifications.requestPermission({ accepted in
+                print("User accepted notifications: \(accepted)")
+            }, fallbackToSettings: true)
+        } else {
+            print("⚠️ OneSignal App ID not found in environment")
+        }
+        
+        // Initialize notification manager
+        _ = NotificationManager.shared
+        
+        return true
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("Device Token: \(tokenString)")
     }
 }
 
@@ -40,8 +48,6 @@ struct ToDoAppApp: App {
     
     init() {
         FirebaseApp.configure()
-        // Request notification permissions
-        NotificationManager.shared.requestAuthorization()
     }
     
     var body: some Scene {

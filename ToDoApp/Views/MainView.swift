@@ -12,11 +12,13 @@ struct MainView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     var body: some View {
-        if viewModel.isSignedIn, !viewModel.currentUserId.isEmpty {
-            accountView
-        } else {
-            LogInView()
-        }
+//        if viewModel.isSignedIn, !viewModel.currentUserId.isEmpty {
+//            accountView
+//        } else {
+//            LogInView()
+//        }
+        accountView
+            
     }
     
     @ViewBuilder

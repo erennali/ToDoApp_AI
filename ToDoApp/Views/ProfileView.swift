@@ -27,45 +27,49 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             VStack {
-                if isDemo {
-                    // Demo kullanıcı mesajı
-                    VStack(spacing: 20) {
-                        Image(systemName: "person.fill.questionmark")
-                            .font(.system(size: 50))
-                            .foregroundColor(.gray)
-                        
-                        Text("Demo Hesap")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        
-                        Text("Profil özelliklerini kullanmak için lütfen bir hesap oluşturun veya giriş yapın.")
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.gray)
-                            .padding(.horizontal)
-                        
-                        Button(action: {
-                            try? Auth.auth().signOut()
-                            Auth.clearDemoUserData()
-                        }) {
-                            HStack {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
-                                Text("Çıkış Yap")
-                            }
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 15))
-                        }
-                        .padding(.horizontal)
-                    }
+//                if isDemo {
+//                    // Demo kullanıcı mesajı
+//                    VStack(spacing: 20) {
+//                        Image(systemName: "person.fill.questionmark")
+//                            .font(.system(size: 50))
+//                            .foregroundColor(.gray)
+//                        
+//                        Text("Demo Hesap")
+//                            .font(.title2)
+//                            .fontWeight(.bold)
+//                        
+//                        Text("Profil özelliklerini kullanmak için lütfen bir hesap oluşturun veya giriş yapın.")
+//                            .multilineTextAlignment(.center)
+//                            .foregroundColor(.gray)
+//                            .padding(.horizontal)
+//                        
+//                        Button(action: {
+//                            try? Auth.auth().signOut()
+//                            Auth.clearDemoUserData()
+//                        }) {
+//                            HStack {
+//                                Image(systemName: "rectangle.portrait.and.arrow.right")
+//                                Text("Çıkış Yap")
+//                            }
+//                            .fontWeight(.semibold)
+//                            .foregroundColor(.white)
+//                            .frame(maxWidth: .infinity)
+//                            .padding()
+//                            .background(
+//                                LinearGradient(
+//                                    gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
+//                                    startPoint: .leading,
+//                                    endPoint: .trailing
+//                                )
+//                            )
+//                            .clipShape(RoundedRectangle(cornerRadius: 15))
+//                        }
+//                        .padding(.horizontal)
+//                    }
+                if viewModel.user == nil {
+                
+                LogInView()
+                
                 } else {
                     // Normal kullanıcı profil görünümü
                     ZStack {

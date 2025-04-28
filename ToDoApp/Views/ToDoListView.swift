@@ -15,10 +15,18 @@ struct ToDoListView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   
     init(userId: String) {
-        self._items = FirestoreQuery(collectionPath: "users/\(userId)/todos", predicates: [
-            .order(by: "dueDate", descending: false)
-        ])
-        self._viewModel = StateObject(wrappedValue: ToDoListViewViewModel(userId: userId))
+        if userId.isEmpty {
+            self._items = FirestoreQuery(collectionPath: "users/e5qlBcxX0taiyO9B54ng4B9EfFS2/todos", predicates: [
+                .order(by: "dueDate", descending: false)
+            ])
+            self._viewModel = StateObject(wrappedValue: ToDoListViewViewModel(userId: "e5qlBcxX0taiyO9B54ng4B9EfFS2"))
+        }else {
+            self._items = FirestoreQuery(collectionPath: "users/\(userId)/todos", predicates: [
+                .order(by: "dueDate", descending: false)
+            ])
+            self._viewModel = StateObject(wrappedValue: ToDoListViewViewModel(userId: userId))
+            
+        }
     }
     
     var body: some View {

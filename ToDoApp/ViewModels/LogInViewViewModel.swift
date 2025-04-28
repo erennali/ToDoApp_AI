@@ -59,6 +59,7 @@ class LogInViewViewModel: ObservableObject {
                     }
                     return
                 }
+                MainView(viewModel: MainViewViewModel())
             }
         }
     }

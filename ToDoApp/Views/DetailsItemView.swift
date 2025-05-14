@@ -11,6 +11,7 @@ struct DetailsItemView: View {
     let item: ToDoListItem
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ToDoListItemViewViewModel()
+    @State private var showingDeleteAlert = false
     
     private var isOverdue: Bool {
         Date(timeIntervalSince1970: item.dueDate) < Date()
@@ -161,14 +162,32 @@ struct DetailsItemView: View {
             .navigationTitle("Görev Detayı")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        viewModel.toggleIsDone(item: item)
-                        dismiss()
-                    } label: {
-                        Image(systemName: item.isDone ? "xmark.circle.fill" : "checkmark.circle.fill")
-                            .foregroundColor(item.isDone ? .red : .green)
+                    HStack(spacing: 16) {
+                        Button {
+                            viewModel.toggleIsDone(item: item)
+                            dismiss()
+                        } label: {
+                            Image(systemName: item.isDone ? "xmark.circle.fill" : "checkmark.circle.fill")
+                                .foregroundColor(item.isDone ? .red : .green)
+                        }
+                        
+                        Button {
+                            showingDeleteAlert = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
                     }
                 }
+            }
+            .alert("Görevi Sil", isPresented: $showingDeleteAlert) {
+                Button("İptal", role: .cancel) { }
+                Button("Sil", role: .destructive) {
+                    viewModel.delete(id: item.id)
+                    dismiss()
+                }
+            } message: {
+                Text("Bu görevi silmek istediğinizden emin misiniz?")
             }
         }
     }

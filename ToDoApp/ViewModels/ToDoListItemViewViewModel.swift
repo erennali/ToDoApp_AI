@@ -38,4 +38,21 @@ class ToDoListItemViewViewModel : ObservableObject {
                 }
             }
     }
+    
+    func delete(id: String) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("users")
+            .document(uid)
+            .collection("todos")
+            .document(id)
+            .delete { error in
+                if let error = error {
+                    print("Error deleting document: \(error)")
+                }
+            }
+    }
 }

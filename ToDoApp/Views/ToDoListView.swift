@@ -97,8 +97,18 @@ struct ToDoListView: View {
                                         )
                                     }
                                     
+                                    // Geçmiş görevler
+                                    let pastItems = items.filter { !isTodayTask($0) && Date(timeIntervalSince1970: $0.dueDate) < Date() }
+                                    if !pastItems.isEmpty {
+                                        taskSection(
+                                            title: "Geçmiş Görevler",
+                                            items: pastItems,
+                                            icon: "clock.arrow.circlepath"
+                                        )
+                                    }
+                                    
                                     // Gelecek görevler
-                                    let futureItems = items.filter { !isTodayTask($0) }
+                                    let futureItems = items.filter { !isTodayTask($0) && Date(timeIntervalSince1970: $0.dueDate) > Date() }
                                     if !futureItems.isEmpty {
                                         taskSection(
                                             title: "Gelecek Görevler",
@@ -119,8 +129,18 @@ struct ToDoListView: View {
                                     )
                                 }
                                 
+                                // Geçmiş görevler
+                                let pastItems = items.filter { !isTodayTask($0) && Date(timeIntervalSince1970: $0.dueDate) < Date() }
+                                if !pastItems.isEmpty {
+                                    taskSection(
+                                        title: "Geçmiş Görevler",
+                                        items: pastItems,
+                                        icon: "clock.arrow.circlepath"
+                                    )
+                                }
+                                
                                 // Gelecek görevler
-                                let futureItems = items.filter { !isTodayTask($0) }
+                                let futureItems = items.filter { !isTodayTask($0) && Date(timeIntervalSince1970: $0.dueDate) > Date() }
                                 if !futureItems.isEmpty {
                                     taskSection(
                                         title: "Gelecek Görevler",

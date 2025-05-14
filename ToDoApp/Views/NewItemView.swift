@@ -12,6 +12,7 @@ struct NewItemView: View {
     @StateObject private var viewModel: NewItemViewViewModel
     let alinanMetin: String
     @Environment(\.dismiss) private var dismiss
+    @State private var showingInfoAlert = false
     
     init(newItemPresented: Binding<Bool>, alinanMetin: String) {
         self._newItemPresented = newItemPresented
@@ -68,8 +69,16 @@ struct NewItemView: View {
                             
                             // Alarm Toggle
                             HStack {
-                                Label("Hatırlatıcı Kur", systemImage: "clock.badge")
-                                    .foregroundColor(.gray)
+                                HStack(spacing: 4) {
+                                    Label("Hatırlatıcı Kur", systemImage: "clock.badge")
+                                        .foregroundColor(.gray)
+                                    Button {
+                                        showingInfoAlert = true
+                                    } label: {
+                                        Image(systemName: "info.circle")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
                                 Spacer()
                                 Toggle("", isOn: $viewModel.onClock)
                                     .tint(.blue)
@@ -132,6 +141,11 @@ struct NewItemView: View {
                     title: Text("Hata"),
                     message: Text("Lütfen verilerin doğruluğunu kontrol ediniz.")
                 )
+            }
+            .alert("Hatırlatıcı Bilgisi", isPresented: $showingInfoAlert) {
+                Button("Anladım", role: .cancel) { }
+            } message: {
+                Text("Hatırlatıcı kurulduğunda, görevin bitiş tarihinden 30 dakika önce size bildirim gönderilecektir.")
             }
         }
     }

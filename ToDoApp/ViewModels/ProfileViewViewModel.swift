@@ -20,10 +20,18 @@ class ProfileViewViewModel: ObservableObject {
     private let db = Firestore.firestore()
     private var authStateListener: AuthStateDidChangeListenerHandle?
     
+    // Veri yükleme durumunu izlemek için
+    private var isFetchingData = false
+    
     static let shared = ProfileViewViewModel()
     
     init() {
         setupAuthStateListener()
+        
+        // İlk başlatıldığında, eğer kullanıcı varsa hemen verileri yüklemeye başla
+        if let userId = Auth.auth().currentUser?.uid {
+            fetchUserData(userId: userId)
+        }
     }
     
     private func setupAuthStateListener() {
@@ -45,60 +53,78 @@ class ProfileViewViewModel: ObservableObject {
     }
     
     private func fetchUserData(userId: String) {
-        isLoading = true
+        // Eğer halihazırda veri yükleme işlemi yapılıyorsa, tekrar başlatma
+        guard !isFetchingData else {
+            print("User data fetch already in progress for \(userId)")
+            return
+        }
         
-        db.collection("users")
-            .document(userId)
-            .getDocument { [weak self] snapshot, error in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    print("Error fetching user: \(error.localizedDescription)")
-                    self.handleError()
-                    return
-                }
-                
-                guard let data = snapshot?.data() else {
-                    print("No user data found")
-                    self.handleError()
-                    return
-                }
-                
+        isLoading = true
+        isFetchingData = true
+        print("Fetching user data for \(userId)...")
+        
+        let userDocument = db.collection("users").document(userId)
+        let profileImageRef = storage.child("profile_images/\(userId).jpg")
+        
+        // Kullanıcı verisi ve profil fotoğrafını paralel olarak yükle
+        let dispatchGroup = DispatchGroup()
+        
+        // Kullanıcı verileri yükleme
+        dispatchGroup.enter()
+        userDocument.getDocument { [weak self] snapshot, error in
+            defer { dispatchGroup.leave() }
+            
+            if let error = error {
+                print("Error fetching user: \(error.localizedDescription)")
+                self?.handleError()
+                return
+            }
+            
+            guard let data = snapshot?.data() else {
+                print("No user data found")
+                self?.handleError()
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self?.user = User(
+                    id: data["id"] as? String ?? "",
+                    name: data["name"] as? String ?? "",
+                    email: data["email"] as? String ?? "",
+                    joined: data["joined"] as? TimeInterval ?? 0,
+                    aiMessageQuota: data["aiMessageQuota"] as? Int ?? 0
+                )
+            }
+        }
+        
+        // Profil fotoğrafı yükleme
+        dispatchGroup.enter()
+        profileImageRef.getData(maxSize: 5 * 1024 * 1024) { [weak self] data, error in
+            defer { dispatchGroup.leave() }
+            
+            if let error = error {
+                print("Error downloading image: \(error.localizedDescription)")
+            } else if let data = data, let image = UIImage(data: data) {
                 DispatchQueue.main.async {
-                    self.user = User(
-                        id: data["id"] as? String ?? "",
-                        name: data["name"] as? String ?? "",
-                        email: data["email"] as? String ?? "",
-                        joined: data["joined"] as? TimeInterval ?? 0,
-                        aiMessageQuota: data["aiMessageQuota"] as? Int ?? 0
-                    )
-                    
-                    // Profil fotoğrafını hemen yükle
-                    self.loadProfileImage(userId: userId)
+                    self?.profileImage = image
                 }
             }
+        }
+        
+        // Tüm veriler yüklendiğinde
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            self?.isLoading = false
+            self?.isFetchingData = false
+            print("User data loading completed for \(userId)")
+        }
     }
     
     private func handleError() {
         DispatchQueue.main.async {
             self.isLoading = false
+            self.isFetchingData = false
             self.user = nil
             self.profileImage = nil
-        }
-    }
-    
-    private func loadProfileImage(userId: String) {
-        let profileImageRef = storage.child("profile_images/\(userId).jpg")
-        
-        profileImageRef.getData(maxSize: 5 * 1024 * 1024) { [weak self] data, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("Error downloading image: \(error.localizedDescription)")
-                } else if let data = data, let image = UIImage(data: data) {
-                    self?.profileImage = image
-                }
-                self?.isLoading = false
-            }
         }
     }
     

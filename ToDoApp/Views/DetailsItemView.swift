@@ -13,6 +13,9 @@ struct DetailsItemView: View {
     @StateObject private var viewModel = ToDoListItemViewViewModel()
     @State private var showingDeleteAlert = false
     
+    // Track the completion status in a local state variable
+    @State private var isItemDone: Bool = false
+    
     private var isOverdue: Bool {
         Date(timeIntervalSince1970: item.dueDate) < Date()
     }
@@ -37,9 +40,9 @@ struct DetailsItemView: View {
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
-                                .strikethrough(item.isDone || viewModel.isDone)
+                                .strikethrough(isItemDone)
                             
-                            if isOverdue && !(item.isDone || viewModel.isDone) {
+                            if isOverdue && !isItemDone {
                                 HStack(spacing: 15) {
                                     Image (systemName: "exclamationmark.triangle.fill")
                                         .foregroundColor(.red)
@@ -55,17 +58,17 @@ struct DetailsItemView: View {
                             HStack(spacing: 15) {
                                 // Completion Status
                                 HStack(spacing: 6) {
-                                    Image(systemName: (item.isDone || viewModel.isDone) ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor((item.isDone || viewModel.isDone) ? .green : .orange)
-                                    Text((item.isDone || viewModel.isDone) ? "Tamamlandı" : "Devam Ediyor")
+                                    Image(systemName: isItemDone ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(isItemDone ? .green : .orange)
+                                    Text(isItemDone ? "Tamamlandı" : "Devam Ediyor")
                                         .font(.subheadline)
-                                        .foregroundColor((item.isDone || viewModel.isDone) ? .green : .orange)
+                                        .foregroundColor(isItemDone ? .green : .orange)
                                     
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
                                 .background(
-                                    ((item.isDone || viewModel.isDone) ? Color.green : Color.orange)
+                                    (isItemDone ? Color.green : Color.orange)
                                         .opacity(0.15)
                                 )
                                 .cornerRadius(20)
@@ -166,10 +169,9 @@ struct DetailsItemView: View {
                     HStack(spacing: 16) {
                         Button {
                             viewModel.toggleIsDone(item: item)
-                            dismiss()
                         } label: {
-                            Image(systemName: (item.isDone || viewModel.isDone) ? "xmark.circle.fill" : "checkmark.circle.fill")
-                                .foregroundColor((item.isDone || viewModel.isDone) ? .red : .green)
+                            Image(systemName: isItemDone ? "xmark.circle.fill" : "checkmark.circle.fill")
+                                .foregroundColor(isItemDone ? .red : .green)
                         }
                         
                         Button {
@@ -192,7 +194,31 @@ struct DetailsItemView: View {
             }
         }
         .onAppear {
+            // Tell the viewModel which item we're tracking
+            viewModel.setItem(item)
+            
+            // Initialize local state from the item
+            isItemDone = item.isDone
             viewModel.isDone = item.isDone
+        }
+        .onChange(of: viewModel.isDone) { newValue in
+            // Update our local state when the view model changes
+            isItemDone = newValue
+        }
+        // Listen for status changes from other views
+        .onReceive(NotificationCenter.default.publisher(for: .todoStatusChanged)) { notification in
+            guard let userInfo = notification.userInfo,
+                  let todoId = userInfo["todoId"] as? String,
+                  let newStatus = userInfo["isDone"] as? Bool,
+                  item.id == todoId // Only update if this is the same item
+            else {
+                return
+            }
+            
+            // Update our local state to reflect the change
+            DispatchQueue.main.async {
+                isItemDone = newStatus
+            }
         }
     }
     

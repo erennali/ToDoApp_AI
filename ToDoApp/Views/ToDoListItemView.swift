@@ -12,6 +12,9 @@ struct ToDoListItemView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let item: ToDoListItem
     
+    // Track the completion status in a local state variable
+    @State private var isItemDone: Bool = false
+    
     private var isOverdue: Bool {
         Date(timeIntervalSince1970: item.dueDate) < Date()
     }
@@ -30,9 +33,9 @@ struct ToDoListItemView: View {
             Button {
                 viewModel.toggleIsDone(item: item)
             } label: {
-                Image(systemName: item.isDone || viewModel.isDone ? "checkmark.circle.fill" : "circle")
+                Image(systemName: isItemDone ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: horizontalSizeClass == .regular ? 28 : 24))
-                    .foregroundStyle(item.isDone || viewModel.isDone ? Color.green : Color.blue)
+                    .foregroundStyle(isItemDone ? Color.green : Color.blue)
                     .contentShape(Rectangle())
             }
             
@@ -40,8 +43,8 @@ struct ToDoListItemView: View {
             VStack(alignment: .leading, spacing: horizontalSizeClass == .regular ? 6 : 4) {
                 Text(item.title)
                     .font(.system(size: horizontalSizeClass == .regular ? 18 : 16, weight: .medium))
-                    .foregroundColor(item.isDone || viewModel.isDone ? .gray : .primary)
-                    .strikethrough(item.isDone || viewModel.isDone)
+                    .foregroundColor(isItemDone ? .gray : .primary)
+                    .strikethrough(isItemDone)
                 
                 HStack(spacing: 6) {
                     Image(systemName: "clock")
@@ -62,10 +65,10 @@ struct ToDoListItemView: View {
                 if item.onClock {
                     Image(systemName: "bell.fill")
                         .font(.system(size: horizontalSizeClass == .regular ? 16 : 14))
-                        .foregroundColor(item.isDone || viewModel.isDone ? .gray : .orange)
+                        .foregroundColor(isItemDone ? .gray : .orange)
                 }
                 
-                if isOverdue && !(item.isDone || viewModel.isDone) {
+                if isOverdue && !isItemDone {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: horizontalSizeClass == .regular ? 16 : 14))
                         .foregroundColor(.red)
@@ -75,7 +78,31 @@ struct ToDoListItemView: View {
         .padding(.vertical, horizontalSizeClass == .regular ? 12 : 8)
         .padding(.horizontal, horizontalSizeClass == .regular ? 16 : 12)
         .onAppear {
+            // Tell the viewModel which item we're tracking
+            viewModel.setItem(item)
+            
+            // Initialize local state from the item
+            isItemDone = item.isDone
             viewModel.isDone = item.isDone
+        }
+        .onChange(of: viewModel.isDone) { newValue in
+            // Update our local state when the view model changes
+            isItemDone = newValue
+        }
+        // Listen for status changes in this item from other views
+        .onReceive(NotificationCenter.default.publisher(for: .todoStatusChanged)) { notification in
+            guard let userInfo = notification.userInfo,
+                  let todoId = userInfo["todoId"] as? String,
+                  let newStatus = userInfo["isDone"] as? Bool,
+                  item.id == todoId // Only update if this is the same item
+            else {
+                return
+            }
+            
+            // Update our local state to reflect the change
+            DispatchQueue.main.async {
+                isItemDone = newStatus
+            }
         }
     }
 }

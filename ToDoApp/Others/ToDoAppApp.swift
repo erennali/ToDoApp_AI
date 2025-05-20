@@ -48,6 +48,21 @@ struct ToDoAppApp: App {
     
     init() {
         FirebaseApp.configure()
+        
+        // App başlatılırken kullanıcı durumunu önceden hazırla
+        preloadAuthenticationState()
+    }
+    
+    // Kullanıcı kimlik doğrulama durumunu önceden yükle
+    private func preloadAuthenticationState() {
+        if let user = Auth.auth().currentUser {
+            print("App launch: Found existing user \(user.uid)")
+            
+            // Kullanıcının verilerini ProfileViewViewModel aracılığıyla önceden yükle
+            _ = ProfileViewViewModel.shared
+        } else {
+            print("App launch: No user logged in")
+        }
     }
     
     var body: some Scene {
@@ -59,6 +74,9 @@ struct ToDoAppApp: App {
                         if let user = Auth.auth().currentUser {
                             viewModel.currentUserId = user.uid
                             viewModel.isSignedIn = true
+                            
+                            // ProfileViewViewModel'i önceden başlat
+                            let _ = ProfileViewViewModel.shared
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

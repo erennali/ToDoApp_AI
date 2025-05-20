@@ -6,19 +6,28 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct MainView: View {
     @ObservedObject var viewModel: MainViewViewModel
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     var body: some View {
-//        if viewModel.isSignedIn, !viewModel.currentUserId.isEmpty {
-//            accountView
-//        } else {
-//            LogInView()
-//        }
-        accountView
-            
+        Group {
+            if viewModel.isSignedIn, !viewModel.currentUserId.isEmpty {
+                accountView
+            } else {
+                LogInView()
+            }
+        }
+        .onAppear {
+            // MainView gösterildiğinde kullanıcı durumunu tekrar kontrol et
+            // Bu durumda, splash ekranında zaten kullanıcı verileri yüklenmiş olmalı
+            if let user = Auth.auth().currentUser, viewModel.currentUserId.isEmpty {
+                viewModel.currentUserId = user.uid
+                viewModel.isSignedIn = true
+            }
+        }
     }
     
     @ViewBuilder

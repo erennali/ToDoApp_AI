@@ -15,6 +15,9 @@ struct WelcomeView: View {
     @State private var textOffset: CGFloat = 50
     @State private var imageOpacity: Double = 0.7
     
+    // Reference to ProfileViewViewModel for prefetching
+    @StateObject private var profileViewModel = ProfileViewViewModel.shared
+    
     var body: some View {
         ZStack {
             // Background image with overlay
@@ -70,6 +73,9 @@ struct WelcomeView: View {
             .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
         }
         .onAppear {
+            // Splash screen gösterilirken user bilgilerini önceden yükle
+            prefetchUserData()
+            
             withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
                 logoSize = 1.0
             }
@@ -80,12 +86,23 @@ struct WelcomeView: View {
                 imageOpacity = 1.0
             }
             
-            // Ana ekrana geçiş
+            // Ana ekrana geçiş - kullanıcı verisi yüklenirken splash ekranı kalır
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 withAnimation {
                     isActive = true
                 }
             }
+        }
+    }
+    
+    // Kullanıcı verilerini önceden yükle
+    private func prefetchUserData() {
+        if let user = Auth.auth().currentUser {
+            print("Splash screen: Prefetching user data for \(user.uid)")
+            // ProfileViewViewModel'deki fetch işlemi otomatik olarak çalışacak
+            // Bu sayede MainView'a geçmeden önce veriler yüklenmiş olacak
+        } else {
+            print("Splash screen: No user logged in")
         }
     }
 }

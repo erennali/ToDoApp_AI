@@ -11,7 +11,7 @@ import FirebaseStorage
 import FirebaseAuth
 
 struct ProfileView: View {
-    @StateObject var viewModel = ProfileViewViewModel()
+    @StateObject var viewModel = ProfileViewViewModel.shared
     @StateObject private var storeManager = StoreManager.shared
     @State private var showImagePicker = false
     @State private var selectedImage: PhotosPickerItem?
@@ -26,197 +26,25 @@ struct ProfileView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
-//                if isDemo {
-//                    // Demo kullanıcı mesajı
-//                    VStack(spacing: 20) {
-//                        Image(systemName: "person.fill.questionmark")
-//                            .font(.system(size: 50))
-//                            .foregroundColor(.gray)
-//                        
-//                        Text("Demo Hesap")
-//                            .font(.title2)
-//                            .fontWeight(.bold)
-//                        
-//                        Text("Profil özelliklerini kullanmak için lütfen bir hesap oluşturun veya giriş yapın.")
-//                            .multilineTextAlignment(.center)
-//                            .foregroundColor(.gray)
-//                            .padding(.horizontal)
-//                        
-//                        Button(action: {
-//                            try? Auth.auth().signOut()
-//                            Auth.clearDemoUserData()
-//                        }) {
-//                            HStack {
-//                                Image(systemName: "rectangle.portrait.and.arrow.right")
-//                                Text("Çıkış Yap")
-//                            }
-//                            .fontWeight(.semibold)
-//                            .foregroundColor(.white)
-//                            .frame(maxWidth: .infinity)
-//                            .padding()
-//                            .background(
-//                                LinearGradient(
-//                                    gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
-//                                    startPoint: .leading,
-//                                    endPoint: .trailing
-//                                )
-//                            )
-//                            .clipShape(RoundedRectangle(cornerRadius: 15))
-//                        }
-//                        .padding(.horizontal)
-//                    }
-                if viewModel.user == nil {
-                
-                LogInView()
-                
+            Group {
+                if viewModel.isLoading {
+                    // Yükleme göstergesi
+                    VStack {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                            .scaleEffect(1.5)
+                        
+                        Text("Profil bilgileriniz yükleniyor...")
+                            .font(.callout)
+                            .foregroundColor(.gray)
+                            .padding(.top)
+                    }
+                } else if viewModel.user == nil {
+                    // Kullanıcı yok, giriş ekranını göster
+                    LogInView()
                 } else {
                     // Normal kullanıcı profil görünümü
-                    ZStack {
-                        // Arka plan gradyanı
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .ignoresSafeArea()
-                        
-                        if let user = viewModel.user {
-                            ScrollView {
-                                VStack(spacing: horizontalSizeClass == .regular ? 35 : 25) {
-                                    // Profil Başlığı
-                                    profileHeader(user: user)
-                                    
-                                    // iPad için grid layout
-                                    if horizontalSizeClass == .regular {
-                                        LazyVGrid(columns: [
-                                            GridItem(.flexible()),
-                                            GridItem(.flexible())
-                                        ], spacing: 20) {
-                                            // Kişisel Bilgiler Kartı
-                                            profileCard {
-                                                VStack(spacing: 20) {
-                                                    infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
-                                                    Divider()
-                                                    infoRow(icon: "envelope.fill", title: "Email", value: user.email)
-                                                }
-                                            }
-                                            
-                                            // AI Mesaj Kotası ve Katılım Bilgisi
-                                            profileCard {
-                                                VStack(spacing: 20) {
-                                                    infoRow(
-                                                        icon: "brain.head.profile",
-                                                        title: "AI Mesaj Hakkı",
-                                                        value: "\(user.aiMessageQuota) mesaj"
-                                                    )
-                                                    Divider()
-                                                    infoRow(
-                                                        icon: "calendar.badge.clock",
-                                                        title: "Katılım Tarihi",
-                                                        value: "\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))"
-                                                    )
-                                                    
-                                                    // Kredi Satın Alma Bölümü
-                                                    creditPurchaseSection()
-                                                }
-                                            }
-                                        }
-                                        .padding(.horizontal)
-                                    } else {
-                                        // iPhone için normal layout
-                                        VStack(spacing: 15) {
-                                            // Kişisel Bilgiler Kartı
-                                            profileCard {
-                                                VStack(spacing: 15) {
-                                                    infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
-                                                    Divider()
-                                                    infoRow(icon: "envelope.fill", title: "Email", value: user.email)
-                                                }
-                                            }
-                                            
-                                            // AI Mesaj Kotası Kartı
-                                            profileCard {
-                                                infoRow(
-                                                    icon: "brain.head.profile",
-                                                    title: "AI Mesaj Hakkı",
-                                                    value: "\(user.aiMessageQuota) mesaj"
-                                                )
-                                            }
-                                            
-                                            // Katılım Bilgisi Kartı
-                                            profileCard {
-                                                infoRow(
-                                                    icon: "calendar.badge.clock",
-                                                    title: "Katılım Tarihi",
-                                                    value: "\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))"
-                                                )
-                                            }
-                                            
-                                            // Kredi Satın Alma Bölümü
-                                            creditPurchaseSection()
-                                        }
-                                        .padding(.top)
-                                        .padding(.horizontal)
-                                    }
-                                    
-                                    // Çıkış Yap Butonu
-                                    Button(action: { viewModel.logOut() }) {
-                                        HStack {
-                                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                                .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
-                                            Text("Çıkış Yap")
-                                                .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
-                                        }
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: horizontalSizeClass == .regular ? 300 : .infinity)
-                                        .padding()
-                                        .background(
-                                            LinearGradient(
-                                                gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                                        .shadow(color: .red.opacity(0.3), radius: 5, x: 0, y: 3)
-                                    }
-                                    .padding(.top, 10)
-                                    .padding(.horizontal, horizontalSizeClass == .regular ? 0 : 16)
-                                    
-                                    // Hesap Silme Butonu
-                                    Button(action: { 
-                                        showingDemoAlert = true 
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "trash.fill")
-                                            Text("Hesabı Sil")
-                                        }
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.red)
-                                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                                    }
-                                    .padding(.horizontal)
-                                    .alert(isPresented: $showingDemoAlert) {
-                                        Alert(title: Text("Hesabı Sil"), message: Text("Hesabınızı silmek istediğinize emin misiniz?"), primaryButton: .destructive(Text("Sil")) {
-                                            // Hesap silme işlemi
-                                            viewModel.deleteAccount()
-                                        }, secondaryButton: .cancel())
-                                    }
-                                }
-                                .padding(.top, horizontalSizeClass == .regular ? 30 : 20)
-                            }
-                        } else if viewModel.isLoading {
-                            ProgressView("Yükleniyor...")
-                                .scaleEffect(1.5)
-                                .tint(.blue)
-                        } else {
-                            Text("Kullanıcı bilgileri yüklenemedi")
-                                .foregroundColor(.gray)
-                        }
-                    }
+                    profileContent
                 }
             }
             .navigationTitle("Profil")
@@ -232,6 +60,152 @@ struct ProfileView: View {
             }
         }
         .navigationViewStyle(horizontalSizeClass == .regular ? .stack : .stack)
+    }
+    
+    // Profil içeriğini ayrı bir View olarak tanımla
+    @ViewBuilder
+    private var profileContent: some View {
+        ZStack {
+            // Arka plan gradyanı
+            LinearGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            if let user = viewModel.user {
+                ScrollView {
+                    VStack(spacing: horizontalSizeClass == .regular ? 35 : 25) {
+                        // Profil Başlığı
+                        profileHeader(user: user)
+                        
+                        // iPad için grid layout
+                        if horizontalSizeClass == .regular {
+                            LazyVGrid(columns: [
+                                GridItem(.flexible()),
+                                GridItem(.flexible())
+                            ], spacing: 20) {
+                                // Kişisel Bilgiler Kartı
+                                profileCard {
+                                    VStack(spacing: 20) {
+                                        infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
+                                        Divider()
+                                        infoRow(icon: "envelope.fill", title: "Email", value: user.email)
+                                    }
+                                }
+                                
+                                // AI Mesaj Kotası ve Katılım Bilgisi
+                                profileCard {
+                                    VStack(spacing: 20) {
+                                        infoRow(
+                                            icon: "brain.head.profile",
+                                            title: "AI Mesaj Hakkı",
+                                            value: "\(user.aiMessageQuota) mesaj"
+                                        )
+                                        Divider()
+                                        infoRow(
+                                            icon: "calendar.badge.clock",
+                                            title: "Katılım Tarihi",
+                                            value: "\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))"
+                                        )
+                                        
+                                        // Kredi Satın Alma Bölümü
+                                        creditPurchaseSection()
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        } else {
+                            // iPhone için normal layout
+                            VStack(spacing: 15) {
+                                // Kişisel Bilgiler Kartı
+                                profileCard {
+                                    VStack(spacing: 15) {
+                                        infoRow(icon: "person.fill", title: "Kullanıcı Adı", value: user.name)
+                                        Divider()
+                                        infoRow(icon: "envelope.fill", title: "Email", value: user.email)
+                                    }
+                                }
+                                
+                                // AI Mesaj Kotası Kartı
+                                profileCard {
+                                    infoRow(
+                                        icon: "brain.head.profile",
+                                        title: "AI Mesaj Hakkı",
+                                        value: "\(user.aiMessageQuota) mesaj"
+                                    )
+                                }
+                                
+                                // Katılım Bilgisi Kartı
+                                profileCard {
+                                    infoRow(
+                                        icon: "calendar.badge.clock",
+                                        title: "Katılım Tarihi",
+                                        value: "\(Date(timeIntervalSince1970: user.joined).formatted(date: .abbreviated, time: .shortened))"
+                                    )
+                                }
+                                
+                                // Kredi Satın Alma Bölümü
+                                creditPurchaseSection()
+                            }
+                            .padding(.top)
+                            .padding(.horizontal)
+                        }
+                        
+                        // Çıkış Yap Butonu
+                        Button(action: { viewModel.logOut() }) {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                    .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
+                                Text("Çıkış Yap")
+                                    .font(.system(size: horizontalSizeClass == .regular ? 20 : 16))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: horizontalSizeClass == .regular ? 300 : .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.red.opacity(0.8), .orange.opacity(0.8)]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                            .shadow(color: .red.opacity(0.3), radius: 5, x: 0, y: 3)
+                        }
+                        .padding(.top, 10)
+                        .padding(.horizontal, horizontalSizeClass == .regular ? 0 : 16)
+                        
+                        // Hesap Silme Butonu
+                        Button(action: { 
+                            showingDemoAlert = true 
+                        }) {
+                            HStack {
+                                Image(systemName: "trash.fill")
+                                Text("Hesabı Sil")
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 30)
+                        .alert(isPresented: $showingDemoAlert) {
+                            Alert(title: Text("Hesabı Sil"), 
+                                 message: Text("Hesabınızı silmek istediğinize emin misiniz?"), 
+                                 primaryButton: .destructive(Text("Sil")) {
+                                     // Hesap silme işlemi
+                                     viewModel.deleteAccount()
+                                 }, 
+                                 secondaryButton: .cancel())
+                        }
+                    }
+                }
+            }
+        }
     }
     
     // Profil Başlığı

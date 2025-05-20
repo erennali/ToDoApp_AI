@@ -30,9 +30,9 @@ struct ToDoListItemView: View {
             Button {
                 viewModel.toggleIsDone(item: item)
             } label: {
-                Image(systemName: viewModel.isDone ? "checkmark.circle.fill" : "circle")
+                Image(systemName: item.isDone || viewModel.isDone ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: horizontalSizeClass == .regular ? 28 : 24))
-                    .foregroundStyle(viewModel.isDone ? Color.green : Color.blue)
+                    .foregroundStyle(item.isDone || viewModel.isDone ? Color.green : Color.blue)
                     .contentShape(Rectangle())
             }
             
@@ -40,8 +40,8 @@ struct ToDoListItemView: View {
             VStack(alignment: .leading, spacing: horizontalSizeClass == .regular ? 6 : 4) {
                 Text(item.title)
                     .font(.system(size: horizontalSizeClass == .regular ? 18 : 16, weight: .medium))
-                    .foregroundColor(viewModel.isDone ? .gray : .primary)
-                    .strikethrough(viewModel.isDone)
+                    .foregroundColor(item.isDone || viewModel.isDone ? .gray : .primary)
+                    .strikethrough(item.isDone || viewModel.isDone)
                 
                 HStack(spacing: 6) {
                     Image(systemName: "clock")
@@ -62,10 +62,10 @@ struct ToDoListItemView: View {
                 if item.onClock {
                     Image(systemName: "bell.fill")
                         .font(.system(size: horizontalSizeClass == .regular ? 16 : 14))
-                        .foregroundColor(item.isDone ? .gray : .orange)
+                        .foregroundColor(item.isDone || viewModel.isDone ? .gray : .orange)
                 }
                 
-                if isOverdue && item.isDone == false {
+                if isOverdue && !(item.isDone || viewModel.isDone) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: horizontalSizeClass == .regular ? 16 : 14))
                         .foregroundColor(.red)

@@ -37,8 +37,9 @@ struct DetailsItemView: View {
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
+                                .strikethrough(item.isDone || viewModel.isDone)
                             
-                            if isOverdue {
+                            if isOverdue && !(item.isDone || viewModel.isDone) {
                                 HStack(spacing: 15) {
                                     Image (systemName: "exclamationmark.triangle.fill")
                                         .foregroundColor(.red)
@@ -54,17 +55,17 @@ struct DetailsItemView: View {
                             HStack(spacing: 15) {
                                 // Completion Status
                                 HStack(spacing: 6) {
-                                    Image(systemName: item.isDone ? "checkmark.circle.fill" : "circle")
-                                        .foregroundColor(item.isDone ? .green : .orange)
-                                    Text(item.isDone ? "Tamamlandı" : "Devam Ediyor")
+                                    Image(systemName: (item.isDone || viewModel.isDone) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor((item.isDone || viewModel.isDone) ? .green : .orange)
+                                    Text((item.isDone || viewModel.isDone) ? "Tamamlandı" : "Devam Ediyor")
                                         .font(.subheadline)
-                                        .foregroundColor(item.isDone ? .green : .orange)
+                                        .foregroundColor((item.isDone || viewModel.isDone) ? .green : .orange)
                                     
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
                                 .background(
-                                    (item.isDone ? Color.green : Color.orange)
+                                    ((item.isDone || viewModel.isDone) ? Color.green : Color.orange)
                                         .opacity(0.15)
                                 )
                                 .cornerRadius(20)
@@ -167,8 +168,8 @@ struct DetailsItemView: View {
                             viewModel.toggleIsDone(item: item)
                             dismiss()
                         } label: {
-                            Image(systemName: item.isDone ? "xmark.circle.fill" : "checkmark.circle.fill")
-                                .foregroundColor(item.isDone ? .red : .green)
+                            Image(systemName: (item.isDone || viewModel.isDone) ? "xmark.circle.fill" : "checkmark.circle.fill")
+                                .foregroundColor((item.isDone || viewModel.isDone) ? .red : .green)
                         }
                         
                         Button {
@@ -189,6 +190,9 @@ struct DetailsItemView: View {
             } message: {
                 Text("Bu görevi silmek istediğinizden emin misiniz?")
             }
+        }
+        .onAppear {
+            viewModel.isDone = item.isDone
         }
     }
     

@@ -16,9 +16,16 @@ class ToDoListItemViewViewModel : ObservableObject {
     init() {}
     
     func toggleIsDone(item: ToDoListItem) {
-        self.item = item
-        self.isDone = !item.isDone
+        // Toggle the state locally first for immediate UI feedback
+        let newState = !item.isDone
+        self.isDone = newState
         
+        // Store a local copy of the updated item
+        var updatedItem = item
+        updatedItem.setDone(newState)
+        self.item = updatedItem
+        
+        // Update Firestore
         guard let uid = Auth.auth().currentUser?.uid else {
             return
         }
@@ -28,12 +35,12 @@ class ToDoListItemViewViewModel : ObservableObject {
             .document(uid)
             .collection("todos")
             .document(item.id)
-            .updateData(["isDone": self.isDone]) { [weak self] error in
+            .updateData(["isDone": newState]) { [weak self] error in
                 if let error = error {
                     print("Error updating document: \(error)")
                     // Revert the local state if update fails
                     DispatchQueue.main.async {
-                        self?.isDone = !self!.isDone
+                        self?.isDone = !newState
                     }
                 }
             }
